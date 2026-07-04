@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Зеркала под заказ — Ставрополь</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #0a0e1a;
+  --surface: #1a1525;
+  --surface-hover: #241e35;
+  --text: #f5f3ff;
+  --text-secondary: #9ca3af;
+  --accent: #a78bfa;
+  --accent-dim: rgba(167, 139, 250, 0.12);
+  --accent-glow: rgba(167, 139, 250, 0.35);
+  --warm: #fbbf24;
+  --cold: #818cf8;
+  --neutral: #e5e7eb;
+  --danger: #f87171;
+  --gold: #a78bfa;
+  --shadow: none;
+  --border: rgba(255,255,255,0.05);
+  --border-active: rgba(167, 139, 250, 0.5);
+  --coral: #f472b6;
+  --coral-dim: rgba(244, 114, 182, 0.12);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #0a0e1a;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.wrap { max-width: 520px; margin: 0 auto; padding: 24px 18px 120px; }
+
+header { text-align: center; margin-bottom: 8px; padding-top: 8px; }
+header h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(135deg, #e9d5ff 0%, #a78bfa 40%, #8b5cf6 70%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+header p { font-size: 14px; color: var(--text-secondary); font-weight: 400; }
+
+.preview-box {
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 28px 20px;
+  margin: 20px 0 24px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.preview-box::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--cold), var(--warm));
+  opacity: 0.6;
+}
+
+.mirror-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 12px 24px rgba(0,0,0,0.5));
+}
+
+.mirror-svg {
+  width: 100%; height: 100%;
+  transition: all 0.4s ease;
+}
+
+.dim-labels {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.card {
+  background: linear-gradient(145deg, #1a1525 0%, #1f1a2e 100%);
+  border-radius: 18px;
+  padding: 26px 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.03);
+  border: 1px solid rgba(139, 92, 246, 0.08);
+  transition: all 0.3s ease;
+}
+.card:active { transform: none; }
+
+.card:nth-child(1) { background: linear-gradient(145deg, #161225 0%, #1c172e 100%); }
+.card:nth-child(2) { background: linear-gradient(145deg, #181327 0%, #1e192f 100%); }
+.card:nth-child(3) { background: linear-gradient(145deg, #1a1529 0%, #201b31 100%); }
+.card:nth-child(4) { background: linear-gradient(145deg, #1c172b 0%, #221d33 100%); }
+.card:nth-child(5) { background: linear-gradient(145deg, #1e192d 0%, #241f35 100%); }
+.card:nth-child(6) { background: linear-gradient(145deg, #201b2f 0%, #262137 100%); }
+.card:nth-child(7) { background: linear-gradient(145deg, #221d31 0%, #282339 100%); }
+
+.card-title {
+  font-size: 11px; font-weight: 600; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 2px;
+  margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+}
+
+.shape-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (min-width: 400px) { .shape-grid { grid-template-columns: 1fr 1fr 1fr 1fr; } }
+
+.shape-card {
+  padding: 16px 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px; cursor: pointer;
+  text-align: center; font-size: 12px; font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  position: relative;
+}
+.shape-card:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.1); }
+.shape-card.active {
+  border-color: var(--accent); color: var(--text);
+  background: var(--accent-dim);
+  box-shadow: 0 0 24px rgba(167, 139, 250, 0.2);
+  transform: none;
+}
+.shape-icon { width: 40px; height: 40px; margin: 0 auto 8px; }
+.shape-icon svg { width: 100%; height: 100%; }
+
+.size-row { display: flex; gap: 12px; }
+.size-field { flex: 1; }
+.size-field.hidden { display: none; }
+.size-field label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; }
+.input-box {
+  display: flex; align-items: center;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+  transition: all 0.2s ease;
+}
+.input-box:focus-within { 
+  border-color: var(--accent); 
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.1);
+}
+.input-box input {
+  flex: 1; background: none; border: none;
+  padding: 14px 8px; font-size: 18px; font-weight: 600;
+  color: var(--text); text-align: center; outline: none;
+  width: 100%;
+}
+.input-box input::-webkit-outer-spin-button,
+.input-box input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.input-btn {
+  width: 42px; height: 48px; background: none; border: none;
+  color: var(--text-secondary); font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: color 0.2s, background 0.2s;
+}
+.input-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+
+.unit { font-size: 12px; color: var(--text-secondary); margin-left: 4px; }
+
+.toggle-row { display: flex; gap: 10px; }
+.toggle-btn {
+  flex: 1; padding: 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px; cursor: pointer;
+  text-align: center; font-size: 14px; font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  position: relative;
+}
+.toggle-btn:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.1); }
+.toggle-btn.active {
+  border-color: var(--accent); color: var(--accent);
+  background: var(--accent-dim);
+  box-shadow: 0 0 24px rgba(167, 139, 250, 0.2);
+}
+
+.opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.opt-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+.opt-card {
+  padding: 16px 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px; cursor: pointer;
+  text-align: center; font-size: 13px; font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  position: relative;
+}
+.opt-card:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.1); }
+.opt-card.active {
+  border-color: var(--accent); color: var(--text);
+  background: var(--accent-dim);
+  box-shadow: 0 0 24px rgba(167, 139, 250, 0.2);
+  transform: none;
+}
+
+.opt-card .tag { font-size: 11px; color: var(--text-secondary); font-weight: 500; margin-top: 2px; display: block; }
+.opt-card.active .tag { color: var(--accent); }
+
+.color-dot {
+  width: 36px; height: 36px; border-radius: 50%;
+  margin: 0 auto 8px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+  transition: transform 0.3s;
+}
+.opt-card.active .color-dot { transform: scale(1.15); }
+.dot-warm { background: linear-gradient(135deg, #ffd89b, #ff9a3d); }
+.dot-cold { background: linear-gradient(135deg, #a8edea, #4facfe); }
+.dot-neutral { background: linear-gradient(135deg, #fff, #d0d0d0); }
+
+.facet-line {
+  height: 3px; background: #4a5a6e; border-radius: 2px;
+  margin: 0 auto 8px; transition: all 0.3s;
+}
+.opt-card[data-facet="10"] .facet-line { height: 5px; background: #6a7a8e; width: 60%; }
+.opt-card[data-facet="20"] .facet-line { height: 8px; background: #8a9aae; width: 60%; }
+.opt-card[data-facet="25"] .facet-line { height: 10px; background: #9aabbe; width: 60%; }
+
+.check-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px; cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 10px;
+}
+.check-card:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.1); }
+.check-card.active {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  box-shadow: 0 0 24px rgba(167, 139, 250, 0.15);
+}
+.check-card .emoji { display: none; }
+.check-card .info { flex: 1; }
+.check-card .info .name { font-size: 14px; font-weight: 600; color: var(--text); }
+.check-card .info .desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.check-card .price { font-size: 14px; font-weight: 700; color: var(--gold); }
+.check-card .check-circle {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.check-card.active .check-circle {
+  background: var(--accent); border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.check-card .check-circle::after {
+  content: '✓'; font-size: 13px; font-weight: 800; color: var(--bg); opacity: 0; transform: scale(0); transition: all 0.2s;
+}
+.check-card.active .check-circle::after { opacity: 1; transform: scale(1); }
+
+.calc-btn {
+  width: 100%; padding: 18px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 50%, #c084fc 100%);
+  color: #fff; border: none;
+  border-radius: 16px;
+  font-size: 16px; font-weight: 700;
+  cursor: pointer; margin-top: 8px;
+  box-shadow: 0 4px 24px rgba(139, 92, 246, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  letter-spacing: 0.5px;
+}
+.calc-btn:hover { 
+  box-shadow: 0 8px 40px rgba(139, 92, 246, 0.5);
+  transform: translateY(-2px);
+}
+.calc-btn:active { transform: scale(0.98); }
+
+.result {
+  display: none;
+  margin-top: 24px;
+  animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.result.show { display: block; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.result-card {
+  background: linear-gradient(180deg, #221d33 0%, #161225 100%);
+  border-radius: 20px; padding: 32px 24px;
+  text-align: center;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  box-shadow: 0 0 60px rgba(139, 92, 246, 0.12), inset 0 1px 0 rgba(255,255,255,0.04);
+  position: relative;
+}
+
+.result-label { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px; position: relative; font-weight: 700; }
+.result-size { font-size: 16px; color: #faf6eb; font-weight: 500; margin-bottom: 12px; position: relative; }
+.result-price { font-size: 48px; font-weight: 800; color: #fff; margin: 8px 0; position: relative; letter-spacing: -1px; }
+.result-price .currency { font-size: 26px; font-weight: 700; color: var(--accent); }
+.result-details {
+  text-align: left; background: transparent;
+  border-radius: 10px; padding: 18px; margin: 20px 0 16px;
+  font-size: 13px; color: var(--text-secondary); line-height: 1.9;
+  position: relative;
+  border: 1px solid var(--border);
+}
+.result-details strong { color: var(--text); display: block; margin-bottom: 10px; font-size: 14px; }
+.result-details .row { display: flex; padding: 4px 0; }
+.result-details .row span { color: var(--text-secondary); font-size: 14px; }
+.result-note { font-size: 12px; color: var(--text-secondary); margin-top: 8px; position: relative; }
+
+.cta-btn {
+  display: block; width: 100%; padding: 16px;
+  background: transparent;
+  color: var(--accent); border-radius: 16px; text-decoration: none;
+  font-size: 15px; font-weight: 600; margin-top: 16px;
+  text-align: center; position: relative;
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  box-shadow: none;
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+}
+.cta-btn:hover { 
+  background: var(--accent-dim); 
+  border-color: var(--accent);
+  box-shadow: 0 0 24px rgba(167, 139, 250, 0.2);
+}
+
+.footer { text-align: center; font-size: 12px; color: var(--text-secondary); margin-top: 28px; opacity: 0.6; }
+
+.hidden { display: none !important; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #2a3a4e; border-radius: 3px; }
+
+@media (max-width: 380px) {
+  .opt-grid { grid-template-columns: 1fr 1fr; }
+  .opt-grid-3 { grid-template-columns: 1fr 1fr; }
+  .shape-grid { grid-template-columns: 1fr 1fr; }
+  header h1 { font-size: 24px; }
+  .result-price { font-size: 40px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Зеркала под заказ</h1>
+    <p>Соберите своё идеальное зеркало за 30 секунд</p>
+  </header>
+
+  <div class="preview-box">
+    <div class="mirror-wrap has-light warm" id="mirrorWrap">
+      <svg class="mirror-svg" id="mirrorSvg" viewBox="0 0 170 240" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#2a3a4e;stop-opacity:1" />
+            <stop offset="30%" style="stop-color:#1a2a3e;stop-opacity:1" />
+            <stop offset="60%" style="stop-color:#152030;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#1e3040;stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="windowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#4a6a8e;stop-opacity:0.35" />
+            <stop offset="40%" style="stop-color:#3a5a7e;stop-opacity:0.15" />
+            <stop offset="100%" style="stop-color:#2a4a6e;stop-opacity:0" />
+          </linearGradient>
+          <linearGradient id="glareGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#fff;stop-opacity:0.0" />
+            <stop offset="45%" style="stop-color:#fff;stop-opacity:0.0" />
+            <stop offset="50%" style="stop-color:#fff;stop-opacity:0.12" />
+            <stop offset="55%" style="stop-color:#fff;stop-opacity:0.0" />
+            <stop offset="100%" style="stop-color:#fff;stop-opacity:0.0" />
+          </linearGradient>
+          <radialGradient id="cornerGlow" cx="80%" cy="20%" r="60%">
+            <stop offset="0%" style="stop-color:#fff;stop-opacity:0.08" />
+            <stop offset="100%" style="stop-color:#fff;stop-opacity:0" />
+          </radialGradient>
+          <filter id="ledGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="8" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <linearGradient id="bevelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#6a8aaa;stop-opacity:0.6" />
+            <stop offset="50%" style="stop-color:#3a5a7a;stop-opacity:0.3" />
+            <stop offset="100%" style="stop-color:#1a3a5a;stop-opacity:0.6" />
+          </linearGradient>
+          <linearGradient id="floorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#1a3040;stop-opacity:0.6" />
+            <stop offset="100%" style="stop-color:#0b1220;stop-opacity:0" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="dim-labels" id="dimLabels">
+      <span id="lblH">180 см</span>
+      <span id="lblW">80 см</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Форма</div>
+    <div class="shape-grid">
+      <div class="shape-card active" onclick="pickShape('rect',this)">
+        <div class="shape-icon">
+          <svg viewBox="0 0 40 40"><rect x="6" y="8" width="28" height="24" rx="4" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        </div>
+        Прямоугольник
+      </div>
+      <div class="shape-card" onclick="pickShape('circle',this)">
+        <div class="shape-icon">
+          <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        </div>
+        Круг
+      </div>
+      <div class="shape-card" onclick="pickShape('oval',this)">
+        <div class="shape-icon">
+          <svg viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="11" ry="16" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        </div>
+        Овал
+      </div>
+      <div class="shape-card" onclick="pickShape('semicircle',this)">
+        <div class="shape-icon">
+          <svg viewBox="0 0 40 40">
+            <line x1="30" y1="8" x2="30" y2="32" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="18" y1="8" x2="30" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="18" y1="32" x2="30" y2="32" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M 18 8 A 12 12 0 0 0 18 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        Полукруг
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Размеры</div>
+    <div class="size-row">
+      <div class="size-field" id="fieldH">
+        <label id="labelH">Высота <span class="unit">см</span></label>
+        <div class="input-box">
+          <button class="input-btn" onclick="adj('h', -10)">−</button>
+          <input type="number" id="h" value="180" oninput="onSizeInput()">
+          <button class="input-btn" onclick="adj('h', 10)">+</button>
+        </div>
+      </div>
+      <div class="size-field" id="fieldW">
+        <label id="labelW">Ширина <span class="unit">см</span></label>
+        <div class="input-box">
+          <button class="input-btn" onclick="adj('w', -10)">−</button>
+          <input type="number" id="w" value="80" oninput="onSizeInput()">
+          <button class="input-btn" onclick="adj('w', 10)">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Подсветка</div>
+    <div class="toggle-row">
+      <div class="toggle-btn active" onclick="setLight(true, this)" id="btnLightYes">
+        С подсветкой
+      </div>
+      <div class="toggle-btn" onclick="setLight(false, this)" id="btnLightNo">
+        Без подсветки
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="lightOpts">
+    <div class="card-title">Управление</div>
+    <div class="opt-grid">
+      <div class="opt-card active" onclick="pick('ctrl','wave',this)" data-val="wave">
+        Взмах
+        <span class="tag">рукой</span>
+      </div>
+      <div class="opt-card" onclick="pick('ctrl','touch',this)" data-val="touch">
+        Сенсор
+        <span class="tag">на зеркале</span>
+      </div>
+      <div class="opt-card" onclick="pick('ctrl','remote',this)" data-val="remote">
+        Пульт
+        <span class="tag">ДУ</span>
+      </div>
+      <div class="opt-card" onclick="pick('ctrl','smart',this)" data-val="smart">
+        Умный дом
+        <span class="tag">Wi-Fi</span>
+      </div>
+    </div>
+
+    <div class="card-title" style="margin-top:20px">Цвет света</div>
+    <div class="opt-grid opt-grid-3">
+      <div class="opt-card active" onclick="pick('clr','warm',this)" data-val="warm">
+        <div class="color-dot dot-warm"></div>
+        Тёплый
+      </div>
+      <div class="opt-card" onclick="pick('clr','cold',this)" data-val="cold">
+        <div class="color-dot dot-cold"></div>
+        Холодный
+      </div>
+      <div class="opt-card" onclick="pick('clr','neutral',this)" data-val="neutral">
+        <div class="color-dot dot-neutral"></div>
+        Нейтральный
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Кромка</div>
+    <div class="base-info" id="edgeInfo" style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:10px;">
+      ✓ Обработка от пореза включена
+    </div>
+    <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Фацет</div>
+    <div class="opt-grid">
+      <div class="opt-card active" onclick="pick('facet','none',this)" data-val="none" data-facet="none">
+        <div class="facet-line"></div>
+        Без фацета
+      </div>
+      <div class="opt-card" onclick="pick('facet','10',this)" data-val="10" data-facet="10">
+        <div class="facet-line"></div>
+        10 мм
+        <span class="tag">180 ₽/м</span>
+      </div>
+      <div class="opt-card" onclick="pick('facet','20',this)" data-val="20" data-facet="20">
+        <div class="facet-line"></div>
+        20 мм
+        <span class="tag">210 ₽/м</span>
+      </div>
+      <div class="opt-card" onclick="pick('facet','25',this)" data-val="25" data-facet="25">
+        <div class="facet-line"></div>
+        25 мм
+        <span class="tag">260 ₽/м</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Дополнительно</div>
+    <div class="check-card" onclick="toggleCheck(this,'film')" id="cardFilm">
+      <span style="font-size:20px;opacity:0.6">&#9632;</span>
+      <div class="info">
+        <div class="name">Бронеплёнка</div>
+        <div class="desc">Защита от осколков при разбитии</div>
+      </div>
+      <span class="price">50 ₽/м²</span>
+      <div class="check-circle"></div>
+    </div>
+    <div class="check-card" onclick="toggleCheck(this,'heat')" id="cardHeat">
+      <span style="font-size:20px;opacity:0.6">&#9632;</span>
+      <div class="info">
+        <div class="name">Подогрев (антипот)</div>
+        <div class="desc">Не запотевает после душа</div>
+      </div>
+      <span class="price">+2 000 ₽</span>
+      <div class="check-circle"></div>
+    </div>
+  </div>
+
+  <button class="calc-btn" onclick="calc()">Рассчитать стоимость</button>
+
+  <div class="result" id="res">
+    <div class="result-card">
+      <div class="result-label">Итоговая стоимость</div>
+      <div class="result-size" id="r-size"></div>
+      <div class="result-price" id="r-sum"></div>
+      <div class="result-details" id="r-inc"></div>
+      <div class="result-note" id="r-note"></div>
+      <a class="cta-btn" id="r-cta" href="#" target="_blank">Написать и заказать</a>
+    </div>
+  </div>
+
+  <div class="footer">Срок изготовления — от 2 дней до недели · Ставрополь</div>
+</div>
+
+<script>
+let state = {
+  shape: 'rect',
+  light: true,
+  ctrl: 'wave',
+  clr: 'warm',
+  facet: 'none',
+  film: false,
+  heat: false
+};
+
+const SHAPE_NAMES = {
+  rect: 'Прямоугольник',
+  circle: 'Круг',
+  oval: 'Овал',
+  semicircle: 'Полукруг'
+};
+
+const VB_W = 170, VB_H = 240, PAD = 10;
+const AVAIL_W = VB_W - PAD * 2;
+const AVAIL_H = VB_H - PAD * 2;
+
+function adj(id, delta) {
+  const el = document.getElementById(id);
+  let v = parseInt(el.value) || 0;
+  v = Math.max(40, v + delta);
+  if (id === 'w') v = Math.min(v, 3210);
+  if (id === 'h') v = Math.min(v, 2250);
+  el.value = v;
+  if (state.shape === 'circle') {
+    document.getElementById('h').value = v;
+  }
+  onSizeInput();
+}
+
+function onSizeInput() {
+  if (state.shape === 'circle') {
+    document.getElementById('h').value = document.getElementById('w').value;
+  }
+  updPreview();
+}
+
+function fitBox(aspect) {
+  let bw, bh;
+  if (aspect >= 1) {
+    bw = AVAIL_W;
+    bh = AVAIL_W / aspect;
+    if (bh > AVAIL_H) { bh = AVAIL_H; bw = AVAIL_H * aspect; }
+  } else {
+    bh = AVAIL_H;
+    bw = AVAIL_H * aspect;
+    if (bw > AVAIL_W) { bw = AVAIL_W; bh = AVAIL_W / aspect; }
+  }
+  return { w: bw, h: bh };
+}
+
+function updPreview() {
+  const w = parseFloat(document.getElementById('w').value) || 150;
+  const h = parseFloat(document.getElementById('h').value) || 70;
+
+  const lblW = document.getElementById('lblW');
+  const lblH = document.getElementById('lblH');
+
+  if (state.shape === 'circle') {
+    lblW.textContent = 'Ø ' + w + ' см';
+    lblH.textContent = '';
+  } else {
+    lblW.textContent = w + ' см';
+    lblH.textContent = h + ' см';
+  }
+
+  const wrap = document.getElementById('mirrorWrap');
+  const maxWrapW = 260, minWrapW = 100, maxWrapH = 320, minWrapH = 100;
+
+  let aspect;
+  if (state.shape === 'circle') {
+    aspect = 1;
+  } else {
+    aspect = w / h;
+  }
+
+  let newW, newH;
+  if (aspect >= 1) {
+    newW = Math.min(maxWrapW, Math.max(minWrapW, 200 * Math.min(aspect, 1.8)));
+    newH = Math.min(maxWrapH, Math.max(minWrapH, newW / aspect));
+  } else {
+    newH = Math.min(maxWrapH, Math.max(minWrapH, 200 * Math.min(1/aspect, 1.8)));
+    newW = Math.min(maxWrapW, Math.max(minWrapW, newH * aspect));
+  }
+
+  wrap.style.width = newW + 'px';
+  wrap.style.height = newH + 'px';
+
+  renderMirrorSvg();
+}
+
+function renderMirrorSvg() {
+  const svg = document.getElementById('mirrorSvg');
+  const w = parseFloat(document.getElementById('w').value) || 150;
+  const h = parseFloat(document.getElementById('h').value) || 70;
+  const shape = state.shape;
+  const hasLight = state.light;
+  const clr = state.clr;
+  const facet = state.facet;
+
+  const colors = { warm: '#ffb347', cold: '#4facfe', neutral: '#e0e0e0' };
+  const glowColor = colors[clr] || '#00d9a3';
+  const facetW = { none: 0, 10: 3, 20: 6, 25: 8 }[facet] || 0;
+
+  const cx = VB_W / 2;
+
+  let content = '';
+
+  if (shape === 'rect') {
+    const aspect = w / h;
+    const fit = fitBox(aspect);
+    const rw = fit.w, rh = fit.h;
+    const rx = 10 * (rw / 150);
+    const x = (VB_W - rw) / 2;
+    const y = (VB_H - rh) / 2;
+
+    content = `
+      <rect class="mirror-glow" x="${x-facetW}" y="${y-facetW}" width="${rw+facetW*2}" height="${rh+facetW*2}" rx="${rx+facetW}" fill="none" stroke="${glowColor}" stroke-width="${hasLight?6:0}" opacity="${hasLight?0.7:0}" filter="url(#ledGlow)" />
+      <rect class="mirror-frame" x="${x}" y="${y}" width="${rw}" height="${rh}" rx="${rx}" fill="none" stroke="url(#bevelGrad)" stroke-width="${facetW}" />
+      <rect class="mirror-body" x="${x}" y="${y}" width="${rw}" height="${rh}" rx="${rx}" fill="url(#glassGrad)" stroke="#2a3a4e" stroke-width="1" />
+      <rect x="${x+10}" y="${y+10}" width="${rw*0.3}" height="${rh*0.3}" rx="4" fill="url(#windowGrad)" opacity="0.6" />
+      <rect x="${x+rw*0.55}" y="${y+15}" width="${rw*0.25}" height="${rh*0.25}" rx="3" fill="url(#windowGrad)" opacity="0.4" />
+      <polygon points="${x},${y} ${x+rw},${y+rh} ${x+rw},${y+rh*0.7} ${x},${y}" fill="url(#glareGrad)" />
+      <rect x="${x}" y="${y}" width="${rw}" height="${rh}" rx="${rx}" fill="url(#cornerGlow)" />
+      <rect x="${x}" y="${y+rh*0.6}" width="${rw}" height="${rh*0.4}" rx="${rx}" fill="url(#floorGrad)" />
+    `;
+  } else if (shape === 'circle') {
+    const fit = fitBox(1);
+    const r = Math.min(fit.w, fit.h) / 2;
+    const cy = VB_H / 2;
+    content = `
+      <circle class="mirror-glow" cx="${cx}" cy="${cy}" r="${r+4+facetW}" fill="none" stroke="${glowColor}" stroke-width="${hasLight?6:0}" opacity="${hasLight?0.7:0}" filter="url(#ledGlow)" />
+      <circle class="mirror-frame" cx="${cx}" cy="${cy}" r="${r+facetW}" fill="none" stroke="url(#bevelGrad)" stroke-width="${facetW}" />
+      <circle class="mirror-body" cx="${cx}" cy="${cy}" r="${r}" fill="url(#glassGrad)" stroke="#2a3a4e" stroke-width="1" />
+      <circle cx="${cx-r*0.2}" cy="${cy-r*0.25}" r="${r*0.3}" fill="url(#windowGrad)" opacity="0.5" />
+      <circle cx="${cx+r*0.3}" cy="${cy-r*0.15}" r="${r*0.22}" fill="url(#windowGrad)" opacity="0.3" />
+      <ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${r}" fill="url(#glareGrad)" opacity="0.8" />
+      <ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${r}" fill="url(#cornerGlow)" />
+      <ellipse cx="${cx}" cy="${cy+r*0.25}" rx="${r*0.7}" ry="${r*0.5}" fill="url(#floorGrad)" opacity="0.6" />
+    `;
+  } else if (shape === 'oval') {
+    const aspect = w / h;
+    const fit = fitBox(aspect);
+    const rx = fit.w / 2;
+    const ry = fit.h / 2;
+    const cy = VB_H / 2;
+    content = `
+      <ellipse class="mirror-glow" cx="${cx}" cy="${cy}" rx="${rx+4+facetW}" ry="${ry+4+facetW}" fill="none" stroke="${glowColor}" stroke-width="${hasLight?6:0}" opacity="${hasLight?0.7:0}" filter="url(#ledGlow)" />
+      <ellipse class="mirror-frame" cx="${cx}" cy="${cy}" rx="${rx+facetW}" ry="${ry+facetW}" fill="none" stroke="url(#bevelGrad)" stroke-width="${facetW}" />
+      <ellipse class="mirror-body" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="url(#glassGrad)" stroke="#2a3a4e" stroke-width="1" />
+      <ellipse cx="${cx-rx*0.2}" cy="${cy-ry*0.3}" rx="${rx*0.35}" ry="${ry*0.3}" fill="url(#windowGrad)" opacity="0.5" />
+      <ellipse cx="${cx+rx*0.3}" cy="${cy-ry*0.15}" rx="${rx*0.25}" ry="${ry*0.22}" fill="url(#windowGrad)" opacity="0.3" />
+      <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="url(#glareGrad)" opacity="0.8" />
+      <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="url(#cornerGlow)" />
+      <ellipse cx="${cx}" cy="${cy+ry*0.35}" rx="${rx*0.7}" ry="${ry*0.5}" fill="url(#floorGrad)" opacity="0.6" />
+    `;
+  } else if (shape === 'semicircle') {
+    const aspect = w / h;
+    const fit = fitBox(aspect);
+    let boxW = fit.w;
+    let boxH = fit.h;
+    const boxX = (VB_W - boxW) / 2;
+    let boxY = (VB_H - boxH) / 2;
+    let r = boxH / 2;
+    let rectW = boxW - r;
+    if (rectW < 0) {
+      r = boxW;
+      boxH = 2 * r;
+      boxY = (VB_H - boxH) / 2;
+      rectW = 0;
+    }
+    const pathMain = `M ${boxX+r} ${boxY} A ${r} ${r} 0 0 0 ${boxX} ${boxY+r} A ${r} ${r} 0 0 0 ${boxX+r} ${boxY+boxH} L ${boxX+boxW} ${boxY+boxH} L ${boxX+boxW} ${boxY} Z`;
+    const pathGlow = `M ${boxX+r} ${boxY-facetW} A ${r+facetW} ${r+facetW} 0 0 0 ${boxX-facetW} ${boxY+r} A ${r+facetW} ${r+facetW} 0 0 0 ${boxX+r} ${boxY+boxH+facetW} L ${boxX+boxW+facetW} ${boxY+boxH+facetW} L ${boxX+boxW+facetW} ${boxY-facetW} Z`;
+    content = `
+      <path class="mirror-glow" d="${pathGlow}" fill="none" stroke="${glowColor}" stroke-width="${hasLight?6:0}" opacity="${hasLight?0.7:0}" filter="url(#ledGlow)" />
+      <path class="mirror-frame" d="${pathMain}" fill="none" stroke="url(#bevelGrad)" stroke-width="${facetW}" />
+      <path class="mirror-body" d="${pathMain}" fill="url(#glassGrad)" stroke="#2a3a4e" stroke-width="1" />
+      <ellipse cx="${boxX+boxW-rectW*0.5}" cy="${boxY+boxH*0.3}" rx="${Math.max(1, rectW*0.3)}" ry="${boxH*0.22}" fill="url(#windowGrad)" opacity="0.5" />
+      <ellipse cx="${boxX+boxW-rectW*0.2}" cy="${boxY+boxH*0.55}" rx="${Math.max(1, rectW*0.15)}" ry="${boxH*0.18}" fill="url(#windowGrad)" opacity="0.3" />
+      <path d="M ${boxX} ${boxY} L ${boxX+boxW} ${boxY+boxH} L ${boxX+boxW} ${boxY+boxH*0.6} L ${boxX} ${boxY} Z" fill="url(#glareGrad)" opacity="0.8" />
+      <path d="${pathMain}" fill="url(#cornerGlow)" />
+      <path d="M ${boxX+r} ${boxY+boxH*0.6} L ${boxX+r} ${boxY+boxH} A ${r} ${r} 0 0 0 ${boxX} ${boxY+r} A ${r} ${r} 0 0 0 ${boxX+r*0.5} ${boxY+boxH*0.75} Z" fill="url(#floorGrad)" opacity="0.5" />
+      <rect x="${boxX+r}" y="${boxY+boxH*0.6}" width="${Math.max(0, rectW)}" height="${boxH*0.4}" fill="url(#floorGrad)" opacity="0.5" />
+    `;
+  }
+
+  svg.innerHTML = svg.querySelector('defs').outerHTML + content;
+}
+
+function pickShape(shape, el) {
+  state.shape = shape;
+  const parent = el.parentNode;
+  parent.querySelectorAll('.shape-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+
+  const fieldH = document.getElementById('fieldH');
+  const fieldW = document.getElementById('fieldW');
+  const labelW = document.getElementById('labelW');
+  const labelH = document.getElementById('labelH');
+  const inputW = document.getElementById('w');
+  const inputH = document.getElementById('h');
+
+  inputH.disabled = false;
+  inputH.style.opacity = '1';
+
+  if (shape === 'circle') {
+    fieldH.classList.add('hidden');
+    labelW.innerHTML = 'Диаметр <span class="unit">см</span>';
+    inputW.value = 90;
+    inputH.value = 90;
+  } else if (shape === 'oval') {
+    fieldH.classList.remove('hidden');
+    fieldW.classList.remove('hidden');
+    labelW.innerHTML = 'Ширина <span class="unit">см</span>';
+    labelH.innerHTML = 'Высота <span class="unit">см</span>';
+    inputW.value = 80;
+    inputH.value = 180;
+  } else if (shape === 'semicircle') {
+    fieldH.classList.remove('hidden');
+    fieldW.classList.remove('hidden');
+    labelW.innerHTML = 'Ширина <span class="unit">см</span>';
+    labelH.innerHTML = 'Высота <span class="unit">см</span>';
+    inputW.value = 80;
+    inputH.value = 180;
+  } else {
+    fieldH.classList.remove('hidden');
+    fieldW.classList.remove('hidden');
+    labelW.innerHTML = 'Ширина <span class="unit">см</span>';
+    labelH.innerHTML = 'Высота <span class="unit">см</span>';
+    inputW.value = 80;
+    inputH.value = 180;
+  }
+
+  updPreview();
+}
+
+function setLight(on, btn) {
+  state.light = on;
+  document.getElementById('btnLightYes').classList.toggle('active', on);
+  document.getElementById('btnLightNo').classList.toggle('active', !on);
+  const wrap = document.getElementById('mirrorWrap');
+  wrap.classList.toggle('has-light', on);
+  renderMirrorSvg();
+  const opts = document.getElementById('lightOpts');
+  opts.style.display = on ? 'block' : 'none';
+  opts.style.animation = on ? 'slideUp 0.4s ease' : 'none';
+}
+
+function pick(group, val, el) {
+  state[group] = val;
+  const parent = el.parentNode;
+  parent.querySelectorAll('.opt-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+
+  if (group === 'clr') {
+    renderMirrorSvg();
+    document.querySelector('.preview-box').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  if (group === 'facet') {
+    renderMirrorSvg();
+    const info = document.getElementById('edgeInfo');
+    if (val === 'none') {
+      info.innerHTML = '✓ Обработка от пореза включена';
+      info.style.color = 'var(--text-secondary)';
+    } else {
+      info.innerHTML = '✓ Фацет ' + val + ' мм — обработка от пореза не требуется';
+      info.style.color = 'var(--accent)';
+    }
+  }
+}
+
+function toggleCheck(el, id) {
+  state[id] = !state[id];
+  el.classList.toggle('active', state[id]);
+}
+
+function fmt(n) { return Math.round(n).toLocaleString('ru-RU'); }
+
+function calcGeometry() {
+  const w = parseFloat(document.getElementById('w').value) || 0;
+  const h = parseFloat(document.getElementById('h').value) || 0;
+  const shape = state.shape;
+
+  let area, per, maxD;
+
+  if (shape === 'rect') {
+    area = (w * h) / 10000;
+    per = 2 * (w + h) / 100;
+    maxD = Math.max(w, h);
+  } else if (shape === 'circle') {
+    const d = w;
+    area = Math.PI * (d/2) * (d/2) / 10000;
+    per = Math.PI * d / 100;
+    maxD = d;
+  } else if (shape === 'oval') {
+    area = (w * h) / 10000;
+    per = 2 * (w + h) / 100;
+    maxD = Math.max(w, h);
+  } else if (shape === 'semicircle') {
+    const r = h / 2;
+    const rectW = Math.max(0, w - r);
+    area = (rectW * h + Math.PI * r * r / 2) / 10000;
+    per = (h + rectW * 2 + Math.PI * r) / 100;
+    maxD = Math.max(w, h);
+  }
+
+  return { area, per, maxD };
+}
+
+function calc() {
+  const w = parseFloat(document.getElementById('w').value) || 0;
+  const h = parseFloat(document.getElementById('h').value) || 0;
+
+  if (w < 40 || (state.shape !== 'circle' && h < 40)) { alert('Минимальный размер — 40 см'); return; }
+  if (w > 3210 || h > 2250) { alert('Максимальный размер — 3210×2250 мм'); return; }
+
+  const geo = calcGeometry();
+  const area = geo.area;
+  const per = geo.per;
+  const maxD = geo.maxD;
+
+  // Коэффициенты накрутки по форме
+  let k;
+  if (state.shape === 'circle') {
+    k = state.light ? 3.3 : 3.3;
+  } else if (state.shape === 'oval') {
+    k = state.light ? 3.3 : 3.3;
+  } else if (state.shape === 'semicircle') {
+    k = state.light ? 4.5 : 4.5;
+  } else {
+    k = state.light ? (maxD > 240 ? 3.25 : 3.11) : 2.51;
+  }
+
+  const costMirror = area * 1500;
+  const costEdge = (state.facet === 'none') ? (per * 150) : 0;
+  const costLED = state.light ? (Math.ceil(per / 5) * 700) : 0;
+  const costBlock = state.light ? 700 : 0;
+  const costSwitch = state.light ? 700 : 0;
+  const costCorner = state.light ? (Math.max(per, 6) * 80) : 0;
+  const costCornerDel = state.light ? 700 : 0;
+  const costDelZ = maxD >= 200 ? 500 : 0;
+  const facetPrices = { 'none': 0, '10': 180, '20': 210, '25': 260 };
+  const costFacet = (facetPrices[state.facet] || 0) * per;
+  const costFilm = state.film ? (50 * area) : 0;
+  const costHeat = state.heat ? 2000 : 0;
+
+  const price = (costMirror + costEdge) * k + costLED + costBlock + costSwitch + costCorner + costCornerDel + costDelZ + costFacet + costFilm + costHeat;
+
+  let sizeText = '';
+  if (state.shape === 'circle') {
+    sizeText = 'Ø ' + w + ' см · ' + SHAPE_NAMES[state.shape];
+  } else {
+    sizeText = h + ' × ' + w + ' см · ' + SHAPE_NAMES[state.shape];
+  }
+  document.getElementById('r-size').textContent = sizeText + (state.light ? ' · С подсветкой' : ' · Без подсветки');
+
+  const sumEl = document.getElementById('r-sum');
+  sumEl.innerHTML = '<span class="currency">₽</span>' + fmt(price);
+
+  let inc = '<strong>В стоимость включено:</strong>';
+  inc += '<div class="row"><span>• Зеркало (' + SHAPE_NAMES[state.shape].toLowerCase() + ')</span></div>';
+  if (state.facet === 'none') {
+    inc += '<div class="row"><span>• Обработка кромки от пореза</span></div>';
+  } else {
+    inc += '<div class="row"><span>• Фацет ' + state.facet + ' мм</span></div>';
+  }
+  if (state.film) inc += '<div class="row"><span>• Бронеплёнка</span></div>';
+  if (state.light) {
+    inc += '<div class="row"><span>• LED-подсветка</span></div>';
+    inc += '<div class="row"><span>• Блок питания + выключатель</span></div>';
+    inc += '<div class="row"><span>• Алюминиевый каркас</span></div>';
+  }
+  if (state.heat) inc += '<div class="row"><span>• Подогрев (антипот)</span></div>';
+  if (costDelZ > 0) inc += '<div class="row"><span>• Доставка зеркала</span></div>';
+  else inc += '<div class="row"><span>• Доставка по Ставрополю — бесплатно</span></div>';
+
+  document.getElementById('r-inc').innerHTML = inc;
+  document.getElementById('r-note').textContent = 'Срок изготовления — от 2 дней до недели. Замер бесплатно.';
+  document.getElementById('r-cta').href = 'https://wa.me/7XXXXXXXXXX?text=' + encodeURIComponent('Здравствуйте! Хочу заказать ' + SHAPE_NAMES[state.shape].toLowerCase() + ' зеркало ' + (state.shape==='circle'?'Ø':'') + w + (state.shape==='circle'?'':'×'+h) + ' см. Рассчитали стоимость: ' + fmt(price) + ' ₽.');
+
+  const res = document.getElementById('res');
+  res.classList.add('show');
+  res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+updPreview();
+setLight(true, document.getElementById('btnLightYes'));
+</script>
+</body>
+</html>
