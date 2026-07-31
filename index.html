@@ -2046,10 +2046,14 @@ function calc() {
     } else {
       k = state.light ? 2.5 : 2.10;  // без подсветки прямоугольник 110%
     }
-  } else if (state.shape === 'double' || state.shape === 'semidouble') {
+  } else if (state.shape === 'double') {
     k = state.light ? 3.0 : 2.30;  // без подсветки из 2 частей 130%
+  } else if (state.shape === 'semidouble') {
+    k = state.light ? 2.05 : 2.00;  // полукруг из 2-х частей: с подсветкой 105%, без 100%
+  } else if (state.shape === 'semicircle') {
+    k = state.light ? 3.60 : 2.60;  // полукруг: с подсветкой 260%, без 160%
   } else {
-    k = state.light ? 3.0 : 2.30;  // без подсветки круг/овал/полукруг 130%
+    k = state.light ? 3.0 : 2.30;  // без подсветки круг/овал 130%
   }
 
   const costMirror = area * 1600;
