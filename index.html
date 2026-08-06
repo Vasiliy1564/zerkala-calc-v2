@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="description" content="Зеркала под заказ в Ставрополе с LED-подсветкой. Любые размеры от 40 см до 3,2 м. Расчёт стоимости онлайн. Доставка и установка.">
+<meta name="description" content="Зеркала под заказ в Ставрополе и Ставропольском крае. LED-подсветка, зеркала в ванную, зеркала с подсветкой, изготовление зеркал на заказ. Любые размеры от 40 см до 3,2 м. Расчёт стоимости онлайн. Доставка и установка. Купить зеркало Ставрополь. Звоните Василию +7 (934)-029-85-28">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Зеркала под заказ — Ставрополь</title>
 <style>
@@ -285,6 +285,90 @@ header .tagline {
   line-height: 1.8;
 }
 .footer a { color: var(--accent); text-decoration: none; }
+
+/* ======== КОНТАКТЫ ======== */
+.contact-block {
+  background: linear-gradient(180deg, #16302B 0%, #0a1814 40%, #070f0c 100%);
+  border-radius: 20px;
+  padding: 28px 20px;
+  text-align: center;
+  border: 1px solid rgba(163, 133, 96, 0.25);
+  margin: 32px 0;
+  position: relative;
+  overflow: hidden;
+}
+.contact-block::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, #390517, #A38560, #16302B, #E0E0E0);
+  opacity: 0.8;
+}
+.contact-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+  position: relative;
+}
+.contact-phone {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+  margin: 8px 0;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  position: relative;
+}
+.contact-phone:hover {
+  color: #c9a96e;
+  text-shadow: 0 0 16px rgba(163, 133, 96, 0.3);
+}
+.contact-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 12px;
+  position: relative;
+}
+
+/* ======== КЛЮЧЕВЫЕ СЛОВА ======== */
+.keywords-block {
+  background: linear-gradient(145deg, #0a1a15 0%, #0f1f18 100%);
+  border-radius: 16px;
+  padding: 18px 16px;
+  margin: 20px 0;
+  border: 1px solid rgba(163, 133, 96, 0.12);
+  text-align: center;
+}
+.keywords-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+.keywords-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.keyword-tag {
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.03);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.keyword-tag:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: linear-gradient(135deg, rgba(163, 133, 96, 0.08), rgba(57, 5, 23, 0.05));
+}
 
 /* ======== КАЛЬКУЛЯТОР ======== */
 .preview-box {
@@ -675,6 +759,7 @@ header .tagline {
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 <div class="wrap">
@@ -699,6 +784,25 @@ header .tagline {
       <p>Любые размеры от 40 см до 3,2 м. LED-подсветка, фацет, бронеплёнка. Срок — от 2 дней.</p>
       <button class="hero-btn" onclick="showSection('calc')">Рассчитать стоимость →</button>
     </div>
+
+    <!-- Ключевые слова -->
+    <div class="keywords-block">
+      <div class="keywords-title">Популярные запросы</div>
+      <div class="keywords-row">
+        <span class="keyword-tag">зеркала под заказ Ставрополь</span>
+        <span class="keyword-tag">зеркала с подсветкой</span>
+        <span class="keyword-tag">LED зеркала</span>
+        <span class="keyword-tag">зеркала в ванную</span>
+        <span class="keyword-tag">зеркала на заказ</span>
+        <span class="keyword-tag">изготовление зеркал</span>
+        <span class="keyword-tag">зеркала Ставропольский край</span>
+        <span class="keyword-tag">зеркало с LED подсветкой</span>
+        <span class="keyword-tag">купить зеркало Ставрополь</span>
+        <span class="keyword-tag">зеркала с подсветкой Ставрополь</span>
+      </div>
+    </div>
+
+
 
     <!-- Бейджи -->
     <div class="badge-row">
@@ -1219,7 +1323,16 @@ header .tagline {
         📢 Наше объявление на Авито
       </a>
     </div>
-  </div>
+  
+    <!-- Контакты -->
+    <div class="section-title">Свяжитесь с нами</div>
+    <div class="contact-block">
+      <div class="contact-name">Василий</div>
+      <a href="tel:+79340298528" class="contact-phone">+7 (934)-029-85-28</a>
+      <a href="tel:+79268677809" class="contact-phone">+7 (926)-867-78-09</a>
+      <div class="contact-hint">Звоните или пишите в WhatsApp</div>
+    </div>
+</div>
 
   <!-- ====== СЕКЦИЯ КАЛЬКУЛЯТОР ====== -->
   <div class="section" id="section-calc">
@@ -1277,6 +1390,25 @@ header .tagline {
           </defs>
         </svg>
       </div>
+
+    <!-- Ключевые слова -->
+    <div class="keywords-block">
+      <div class="keywords-title">Популярные запросы</div>
+      <div class="keywords-row">
+        <span class="keyword-tag">зеркала под заказ Ставрополь</span>
+        <span class="keyword-tag">зеркала с подсветкой</span>
+        <span class="keyword-tag">LED зеркала</span>
+        <span class="keyword-tag">зеркала в ванную</span>
+        <span class="keyword-tag">зеркала на заказ</span>
+        <span class="keyword-tag">изготовление зеркал</span>
+        <span class="keyword-tag">зеркала Ставропольский край</span>
+        <span class="keyword-tag">зеркало с LED подсветкой</span>
+        <span class="keyword-tag">купить зеркало Ставрополь</span>
+        <span class="keyword-tag">зеркала с подсветкой Ставрополь</span>
+      </div>
+    </div>
+
+
       <div class="dim-labels" id="dimLabels">
         <span id="lblH">180 см</span>
         <span id="lblW">80 см</span>
@@ -1545,7 +1677,19 @@ header .tagline {
       </div>
     </div>
 
-    <div class="footer">Срок изготовления — от 2 дней до недели · Ставрополь</div>
+    
+    <!-- Контакты -->
+    <div class="section-title">Свяжитесь с нами</div>
+    <div class="contact-block">
+      <div class="contact-name">Василий</div>
+      <a href="tel:+79340298528" class="contact-phone">+7 (934)-029-85-28</a>
+      <a href="tel:+79268677809" class="contact-phone">+7 (926)-867-78-09</a>
+      <div class="contact-hint">Звоните или пишите в WhatsApp</div>
+    </div>
+<div class="footer">
+    Срок изготовления — от 2 дней до недели · Ставрополь<br>
+    <a href="tel:+79340298528">+7 (934)-029-85-28</a> · <a href="tel:+79268677809">+7 (926)-867-78-09</a> · Василий
+    </div>
   </div>
 
 <script>
@@ -2046,14 +2190,10 @@ function calc() {
     } else {
       k = state.light ? 2.5 : 2.10;  // без подсветки прямоугольник 110%
     }
-  } else if (state.shape === 'double') {
+  } else if (state.shape === 'double' || state.shape === 'semidouble') {
     k = state.light ? 3.0 : 2.30;  // без подсветки из 2 частей 130%
-  } else if (state.shape === 'semidouble') {
-    k = state.light ? 2.05 : 2.00;  // полукруг из 2-х частей: с подсветкой 105%, без 100%
-  } else if (state.shape === 'semicircle') {
-    k = state.light ? 3.60 : 2.60;  // полукруг: с подсветкой 260%, без 160%
   } else {
-    k = state.light ? 3.0 : 2.30;  // без подсветки круг/овал 130%
+    k = state.light ? 3.0 : 2.30;  // без подсветки круг/овал/полукруг 130%
   }
 
   const costMirror = area * 1600;
