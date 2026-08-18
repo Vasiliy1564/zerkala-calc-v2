@@ -555,14 +555,14 @@
     var costCorner = state.light ? (Math.max(per, 6) * 80) : 0;
     var costCornerDel = state.light ? 700 : 0;
     var costDelZ = maxD >= 200 ? 500 : 0;
-    var facetPrices = { 'none': 0, '10': 180, '20': 210, '25': 260 };
+    var facetPrices = { 'none': 0, '10': 220, '20': 250, '25': 300 };
     var costFacet = (facetPrices[state.facet] || 0) * per;
     var costFilm = state.film ? (50 * area) : 0;
     var costHeat = state.heat ? 2000 : 0;
     var installArea = state.shape === 'double' ? ((w * (h + (parseFloat(document.getElementById('height2').value) || 0))) / 10000) : (state.shape === 'circle' || state.shape === 'oval' || state.shape === 'semicircle') ? ((w * h) / 10000) : area;
     var costInstall = state.install ? Math.max(2000, roundUp500(installArea * 1350 + (state.light ? 400 : 0))) : 0;
 
-    var price = Math.round((costMirror + costEdge) * k + costLED + costBlock + costSwitch + costCorner + costCornerDel + costDelZ + costFacet + costFilm + costHeat + costInstall);
+    var price = Math.round((costMirror + costEdge + costFacet) * k + costLED + costBlock + costSwitch + costCorner + costCornerDel + costDelZ + costFilm + costHeat + costInstall);
 
     var sizeText = '';
     if (state.shape === 'circle') {
