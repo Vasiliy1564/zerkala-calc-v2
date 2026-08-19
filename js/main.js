@@ -137,8 +137,7 @@
     facet: 'none',
     film: false,
     heat: false,
-    install: false,
-    glue: false
+    install: false
   };
 
   var SHAPE_NAMES = {
@@ -175,7 +174,6 @@
     state.film = opt('film');
     state.heat = opt('heat');
     state.install = opt('install');
-    state.glue = opt('glue');
   }
 
   function adj(id, delta) {
@@ -447,15 +445,23 @@
 
     var blockLight = document.getElementById('blockLight');
     var blockColor = document.getElementById('blockColor');
-    var glueOpt = document.getElementById('glueOpt');
     if (blockLight) blockLight.classList.toggle('hidden', !on);
     if (blockColor) blockColor.classList.toggle('hidden', !on);
-    if (glueOpt) glueOpt.classList.toggle('hidden', on);
-    if (on && state.glue) {
-      state.glue = false;
-      var g = $('input[name="option"][value="glue"]');
-      if (g) g.checked = false;
+    updateFilmAvailability();
+  }
+
+  function updateFilmAvailability() {
+    var filmOpt = document.getElementById('filmOpt');
+    var filmCb = $('input[name="option"][value="film"]');
+    var installCb = $('input[name="option"][value="install"]');
+    var installInfo = document.getElementById('installInfo');
+    var canFilm = installCb && installCb.checked;
+    if (filmOpt) filmOpt.classList.toggle('hidden', !canFilm);
+    if (filmCb && !canFilm) {
+      filmCb.checked = false;
+      state.film = false;
     }
+    if (installInfo) installInfo.classList.toggle('hidden', !(installCb && installCb.checked));
   }
 
   function onFacetChange() {
@@ -492,8 +498,9 @@
       per = Math.PI * d / 100;
       maxD = d;
     } else if (shape === 'oval') {
-      area = (w * h) / 10000;
-      per = 2 * (w + h) / 100;
+      var a = w / 2, b = h / 2;
+      area = Math.PI * a * b / 10000;
+      per = (Math.PI / 2) * (3 * (w + h) - Math.sqrt((3 * w + h) * (w + 3 * h))) / 100;
       maxD = Math.max(w, h);
     } else if (shape === 'semicircle') {
       var r = h / 2;
@@ -503,15 +510,13 @@
       maxD = Math.max(w, h);
     } else if (shape === 'double') {
       var h2v = parseFloat(document.getElementById('height2').value) || 0;
-      var w2v = w;
-      area = (w * h + w2v * h2v) / 10000;
-      per = (2 * (w + h) + 2 * (w2v + h2v)) / 100;
-      maxD = Math.max(w, h, w2v, h2v);
+      area = (w * h + w * h2v) / 10000;
+      per = (2 * (w + h) + 2 * (w + h2v)) / 100;
+      maxD = Math.max(w, h, h2v);
     } else if (shape === 'semidouble') {
-      var w2s = w;
-      area = (w * h + w2s * h) / 10000;
-      per = (2 * (w + h) + 2 * (w2s + h)) / 100;
-      maxD = Math.max(w, h, w2s);
+      area = (w * h + w * h) / 10000;
+      per = (2 * (w + h) + 2 * (w + h)) / 100;
+      maxD = Math.max(w, h);
     }
 
     return { area: area, per: per, maxD: maxD };
@@ -525,44 +530,73 @@
     var h = parseFloat(hEl.value) || 0;
 
     if (w < 40 || (state.shape !== 'circle' && h < 40)) { alert('Минимальный размер — 40 см'); return; }
-    if (w > 3210 || h > 2250) { alert('Максимальный размер — 3210×2250 мм'); return; }
+
+    var maxD = (state.shape === 'circle') ? w : Math.max(w, h);
+
+    var tariff = maxD <= 250 ? 1500 : 1400;
+    var edgeRate = maxD <= 250 ? 150 : 80;
+    var delivery = maxD <= 250 ? 300 : 1800;
 
     var geo = calcGeometry();
-    var area = geo.area;
+    var blankArea = (w * h) / 10000;
     var per = geo.per;
-    var maxD = geo.maxD;
+    var installArea = geo.area;
 
-    var maxDim = Math.max(w, h);
-    var largeSurcharge = maxDim > 250 ? 1500 : 0;
+    var isFigured = (state.shape === 'circle' || state.shape === 'oval' || state.shape === 'semicircle');
 
-    var k;
-    if (state.shape === 'rect') {
-      k = state.light ? 2.5 : 2.10;
-    } else {
+    var costMirror = blankArea * tariff;
+    var cuttingCost = isFigured ? costMirror * 0.3 : 0;
+    var totalMirrorCost = costMirror + cuttingCost;
+
+    var costEdge = per * edgeRate;
+
+    var facetRate = { none: 0, 10: 180, 20: 210, 25: 260 };
+    var costFacet = (facetRate[state.facet] || 0) * per;
+    var facetDelivery = state.facet !== 'none' ? 1000 : 0;
+
+    var ledRolls = state.light ? Math.ceil(per / 5) : 0;
+    var costLED = ledRolls * 700;
+    var costBlock = state.light ? (per > 5 ? 1000 : 700) : 0;
+    var costSwitch = state.light ? 600 : 0;
+    var costAngle = state.light ? Math.max(per, 6) * 80 : 0;
+    var costAngleDel = state.light ? 1000 : 0;
+
+    var costFilm = state.film ? blankArea * 120 : 0;
+
+    var costHeat = state.heat ? 2500 : 0;
+
+    var costInstall = 0;
+    if (state.install) {
       if (state.light) {
-        k = 3.0;
+        var baseInst;
+        if (installArea <= 2) {
+          baseInst = Math.max(2000, installArea * 1300);
+        } else {
+          baseInst = installArea * 1500;
+        }
+        costInstall = Math.max(2500, baseInst + 500);
       } else {
-        k = maxDim > 250 ? 2.50 : 2.30;
+        if (installArea <= 2) {
+          costInstall = Math.max(2000, installArea * 1300);
+        } else {
+          costInstall = installArea * 1500;
+        }
       }
     }
 
-    var costMirror = area * 1500;
-    var costEdge = per * 150;
-    var costLED = state.light ? (Math.ceil(per / 5) * 500) : 0;
-    var costBlock = state.light ? 600 : 0;
-    var costSwitch = state.light ? 500 : 0;
-    var costCorner = state.light ? (Math.max(per, 6) * 80) : 0;
-    var costCornerDel = state.light ? 700 : 0;
-    var costDelZ = maxD >= 200 ? 500 : 0;
-    var facetPrices = { 'none': 0, '10': 220, '20': 250, '25': 300 };
-    var costFacet = (facetPrices[state.facet] || 0) * per;
-    var facetSurcharge = state.facet !== 'none' ? 1200 : 0;
-    var costFilm = state.film ? (50 * area) : 0;
-    var costHeat = state.heat ? 2000 : 0;
-    var installArea = state.shape === 'double' ? ((w * (h + (parseFloat(document.getElementById('height2').value) || 0))) / 10000) : (state.shape === 'circle' || state.shape === 'oval' || state.shape === 'semicircle') ? ((w * h) / 10000) : area;
-    var costInstall = state.install ? Math.max(2000, roundUp500(installArea * 1350 + (state.light ? 400 : 0))) : 0;
-
-    var price = Math.round(costMirror * k + largeSurcharge + costEdge + costFacet + facetSurcharge + costLED + costBlock + costSwitch + costCorner + costCornerDel + costDelZ + costFilm + costHeat + costInstall);
+    var price;
+    var profitMirror;
+    if (state.light) {
+      var mirrorMarkup = isFigured ? 1.7 : 1.5;
+      price = totalMirrorCost * (1 + mirrorMarkup) + costEdge + delivery + costFacet + facetDelivery + costLED + costBlock + costSwitch + costAngle + costAngleDel + costFilm + costHeat + costInstall;
+      profitMirror = totalMirrorCost * mirrorMarkup;
+    } else {
+      var markupRate = isFigured ? 1.0 : 0.7;
+      price = (costMirror + costEdge) * (1 + markupRate) + cuttingCost + delivery + costFacet + facetDelivery + costFilm + costHeat + costInstall;
+      profitMirror = (costMirror + costEdge) * markupRate;
+    }
+    var profitInstall = costInstall;
+    var totalProfit = profitMirror + profitInstall;
 
     var sizeText = '';
     if (state.shape === 'circle') {
@@ -570,35 +604,24 @@
     } else if (state.shape === 'double') {
       var h2r = parseFloat(document.getElementById('height2').value) || 0;
       sizeText = h + '+' + h2r + ' × ' + w + ' см · ' + SHAPE_NAMES[state.shape];
-    } else if (state.shape === 'semidouble') {
-      sizeText = h + ' × ' + w + ' см · ' + SHAPE_NAMES[state.shape];
     } else {
       sizeText = h + ' × ' + w + ' см · ' + SHAPE_NAMES[state.shape];
     }
     document.getElementById('r-size').textContent = sizeText + (state.light ? ' · С подсветкой' : ' · Без подсветки');
 
-    var sumEl = document.getElementById('r-sum');
-    sumEl.textContent = fmt(price) + ' ₽';
+    document.getElementById('r-sum').textContent = fmt(price) + ' ₽';
 
     var inc = '<div class="row"><span>Зеркало (' + SHAPE_NAMES[state.shape].toLowerCase() + ')</span></div>';
-    if (state.facet === 'none') {
-      inc += '<div class="row"><span>Обработка кромки от пореза</span></div>';
-    } else {
-      inc += '<div class="row"><span>Фацет ' + state.facet + ' мм</span></div>';
-    }
-    if (state.film) inc += '<div class="row"><span>Бронеплёнка</span></div>';
-    if (state.light) {
-      inc += '<div class="row"><span>LED-подсветка COB</span></div>';
-      inc += '<div class="row"><span>Блок питания + выключатель</span></div>';
-      inc += '<div class="row"><span>Алюминиевый каркас из уголка 1,5 мм</span></div>';
-    }
-    if (state.heat) inc += '<div class="row"><span>Подогрев (антипот)</span></div>';
-    if (costDelZ > 0) {
-      inc += '<div class="row"><span>Доставка зеркала</span></div>';
-    } else {
-      inc += '<div class="row"><span>Доставка по Ставрополю — бесплатно</span></div>';
-    }
-    if (state.install) inc += '<div class="row"><span>Установка зеркала — ' + fmt(costInstall) + ' ₽</span></div>';
+    inc += '<div class="row"><span>Обработка кромки от пореза</span></div>';
+    inc += '<div class="row"><span>LED-подсветка COB</span></div>';
+    inc += '<div class="row"><span>Блок питания + выключатель</span></div>';
+    inc += '<div class="row"><span>Алюминиевый каркас из уголка 1,5 мм</span></div>';
+    inc += '<div class="row"><span>Доставка по Ставрополю</span></div>';
+    if (costFacet > 0) inc += '<div class="row"><span>Фацет ' + state.facet + ' мм</span></div>';
+    if (facetDelivery > 0) inc += '<div class="row"><span>Доставка фацета</span></div>';
+    if (costInstall > 0) inc += '<div class="row"><span>Установка</span></div>';
+    if (costFilm > 0) inc += '<div class="row"><span>Бронеплёнка</span></div>';
+    if (costHeat > 0) inc += '<div class="row"><span>Подогрев 40×60 см</span></div>';
 
     document.getElementById('r-inc').innerHTML = inc;
 
@@ -613,19 +636,16 @@
       details.push('без подсветки');
     }
     if (state.facet !== 'none') details.push(FACET_LABELS[state.facet]);
-    if (state.film) details.push('с бронеплёнкой');
-    if (state.heat) details.push('с подогревом');
     if (state.install) details.push('с установкой');
-    if (state.glue) details.push('с приклеиванием');
 
     var ctaText = '';
     if (state.shape === 'double') {
       var h2c = parseFloat(document.getElementById('height2').value) || 0;
-      ctaText = 'Здравствуйте! Хочу заказать зеркало из двух частей ' + h + '+' + h2c + '×' + w + ' см' + (details.length ? ' — ' + details.join(', ') : '') + '. Стоимость по калькулятору: ' + fmt(price) + ' ₽.';
+      ctaText = 'Здравствуйте! Хочу заказать зеркало из двух частей ' + h + '+' + h2c + '×' + w + ' см' + (details.length ? ' — ' + details.join(', ') : '') + '. Стоимость по калькулятору: ' + fmt(Math.round(price)) + ' ₽.';
     } else if (state.shape === 'semidouble') {
-      ctaText = 'Здравствуйте! Хочу заказать полукруг из двух частей ' + h + '×' + w + ' см' + (details.length ? ' — ' + details.join(', ') : '') + '. Стоимость по калькулятору: ' + fmt(price) + ' ₽.';
+      ctaText = 'Здравствуйте! Хочу заказать полукруг из двух частей ' + h + '×' + w + ' см' + (details.length ? ' — ' + details.join(', ') : '') + '. Стоимость по калькулятору: ' + fmt(Math.round(price)) + ' ₽.';
     } else {
-      ctaText = 'Здравствуйте! Хочу заказать ' + SHAPE_NAMES[state.shape].toLowerCase() + ' зеркало ' + (state.shape === 'circle' ? 'Ø' + w : h + '×' + w) + ' см' + (details.length ? ' — ' + details.join(', ') : '') + '. Стоимость по калькулятору: ' + fmt(price) + ' ₽.';
+      ctaText = 'Здравствуйте! Хочу заказать ' + SHAPE_NAMES[state.shape].toLowerCase() + ' зеркало ' + (state.shape === 'circle' ? 'Ø' + w : h + '×' + w) + ' см' + (details.length ? ' — ' + details.join(', ') : '') + '. Стоимость по калькулятору: ' + fmt(Math.round(price)) + ' ₽.';
     }
     document.getElementById('r-cta').href = MAX_URL + '?text=' + encodeURIComponent(ctaText);
 
@@ -646,6 +666,9 @@
   });
   $all('input[name="facet"]').forEach(function (r) {
     r.addEventListener('change', onFacetChange);
+  });
+  $all('input[name="option"][value="install"]').forEach(function (r) {
+    r.addEventListener('change', function () { readState(); updateFilmAvailability(); });
   });
   $all('.stepper-btn').forEach(function (b) {
     b.addEventListener('click', function () {
