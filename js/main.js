@@ -613,12 +613,13 @@
 
     var inc = '<div class="row"><span>Зеркало (' + SHAPE_NAMES[state.shape].toLowerCase() + ')</span></div>';
     inc += '<div class="row"><span>Обработка кромки от пореза</span></div>';
-    inc += '<div class="row"><span>LED-подсветка COB</span></div>';
-    inc += '<div class="row"><span>Блок питания + выключатель</span></div>';
-    inc += '<div class="row"><span>Алюминиевый каркас из уголка 1,5 мм</span></div>';
+    if (state.light) {
+      inc += '<div class="row"><span>LED-подсветка COB</span></div>';
+      inc += '<div class="row"><span>Блок питания + выключатель</span></div>';
+      inc += '<div class="row"><span>Алюминиевый каркас из уголка 1,5 мм</span></div>';
+    }
     inc += '<div class="row"><span>Доставка по Ставрополю</span></div>';
     if (costFacet > 0) inc += '<div class="row"><span>Фацет ' + state.facet + ' мм</span></div>';
-    if (facetDelivery > 0) inc += '<div class="row"><span>Доставка фацета</span></div>';
     if (costInstall > 0) inc += '<div class="row"><span>Установка</span></div>';
     if (costFilm > 0) inc += '<div class="row"><span>Бронеплёнка</span></div>';
     if (costHeat > 0) inc += '<div class="row"><span>Подогрев 40×60 см</span></div>';
