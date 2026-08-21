@@ -181,6 +181,9 @@ a{color:inherit;text-decoration:none}
 .calc-included .row{display:flex;justify-content:space-between;gap:12px}
 .calc-included .row span{white-space:nowrap}
 .calc-included .row .dash{flex:1;border-bottom:1px dotted #b5b0a9;height:1em}
+.calc-included .row--gold{color:#8a744c;font-weight:700}
+.calc-included .row--total{margin-top:6px;padding-top:6px;border-top:1px dotted #b5b0a9;color:#22251f;font-weight:700}
+.calc-included .row--profit{color:#5c6e3f;font-weight:700}
 .calc-cta{display:flex;gap:8px;margin-top:16px}
 .calc-btn{flex:1;display:inline-flex;justify-content:center;align-items:center;min-height:46px;padding:0 14px;border:1px solid #1b1b1a;font-size:12px;font-weight:700;transition:.25s;text-align:center}
 .calc-btn-call{background:#1b1b1a;color:#fff}

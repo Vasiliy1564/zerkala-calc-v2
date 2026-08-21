@@ -1,6 +1,7 @@
 /* ============================================================
    ЗЕРКАЛА ПРО — дизайн ARCO
-   Интерактив + полный калькулятор (алгоритм идентичен исходному)
+   Интерактив + калькулятор (прайс: зеркало 1500 ₽/м², обработка
+   150 ₽/пог.м, наценка 150% при подсветке, доплата по высоте)
    ============================================================ */
 (function () {
   'use strict';
@@ -127,7 +128,7 @@
   }
 
   /* ============================================================
-     КАЛЬКУЛЯТОР — порт исходного алгоритма (идентичные результаты)
+     КАЛЬКУЛЯТОР — актуальный прайс (см. PRICE выше)
      ============================================================ */
   var state = {
     shape: 'rect',
@@ -153,7 +154,29 @@
   var AVAIL_W = VB_W - PAD * 2;
   var AVAIL_H = VB_H - PAD * 2;
 
-  function roundUp500(n) { return Math.ceil(n / 500) * 500; }
+  var PRICE = {
+    mirror: 1500,
+    edge: 150,
+    markup: 1.5,
+    ledRoll: 700,
+    ledRollLen: 5,
+    block: 500,
+    switch: 500,
+    mount: 50,
+    mountStep: 2,
+    delivery: 300,
+    surchargeMid: 1200,
+    surchargeHigh: 3000
+  };
+
+  /* Доплата по высоте: до 200 см — 0; свыше 200 и до 250 включительно — +1200 ₽;
+     выше 250 см — только +3000 ₽ (доплаты не складываются) */
+  function heightSurcharge(hCm) {
+    if (hCm <= 200) return 0;
+    if (hCm <= 250) return PRICE.surchargeMid;
+    return PRICE.surchargeHigh;
+  }
+
   function fmt(n) { return Math.round(n).toLocaleString('ru-RU'); }
 
   function readState() {
@@ -472,7 +495,7 @@
         info.textContent = 'Обработка кромки от пореза включена';
         info.classList.remove('gold');
       } else {
-        info.textContent = 'Фацет ' + state.facet + ' мм — обработка от пореза не требуется';
+        info.textContent = 'Фацет ' + state.facet + ' мм';
         info.classList.add('gold');
       }
     }
@@ -531,72 +554,65 @@
 
     if (w < 40 || (state.shape !== 'circle' && h < 40)) { alert('Минимальный размер — 40 см'); return; }
 
-    var maxD = (state.shape === 'circle') ? w : Math.max(w, h);
-
-    var tariff = maxD <= 250 ? 1500 : 1400;
-    var edgeRate = maxD <= 250 ? 150 : 80;
-    var delivery = maxD <= 250 ? 300 : 1800;
-
     var geo = calcGeometry();
-    var blankArea = (w * h) / 10000;
+    var area = geo.area;
     var per = geo.per;
-    var installArea = geo.area;
 
-    var isFigured = (state.shape === 'circle' || state.shape === 'oval' || state.shape === 'semicircle');
+    /* Высота для доплаты — по первому размеру в форме (поле «Высота»).
+       Ширина на доплату не влияет. */
+    var heightCm = parseFloat(document.getElementById('height').value) || 0;
 
-    var costMirror = blankArea * tariff;
-    var cuttingCost = isFigured ? costMirror * 0.3 : 0;
-    var totalMirrorCost = costMirror + cuttingCost;
+    /* 1–2. Площадь и периметр уже посчитаны в geo */
 
-    var costEdge = per * edgeRate;
+    /* 3. Себестоимость зеркала */
+    var costMirror = area * PRICE.mirror;
 
-    var facetRate = { none: 0, 10: 180, 20: 210, 25: 260 };
-    var costFacet = (facetRate[state.facet] || 0) * per;
-    var facetDelivery = state.facet !== 'none' ? 1000 : 0;
+    /* 4. Обработка кромки от порезов */
+    var costEdge = per * PRICE.edge;
 
-    var ledRolls = state.light ? Math.ceil(per / 5) : 0;
-    var costLED = ledRolls * 700;
-    var costBlock = state.light ? (per > 5 ? 1000 : 700) : 0;
-    var costSwitch = state.light ? 600 : 0;
-    var costAngle = state.light ? Math.max(per, 6) * 80 : 0;
-    var costAngleDel = state.light ? 1000 : 0;
+    var baseCost = costMirror + costEdge;
 
-    var costFilm = state.film ? blankArea * 120 : 0;
+    /* 5. Наценка 150% на зеркало + обработку */
+    var markup = baseCost * PRICE.markup;
 
-    var costHeat = state.heat ? 2500 : 0;
+    /* 6. Дополнительные расходы — без наценки, по себестоимости */
+    var ledRolls = state.light ? Math.ceil(per / PRICE.ledRollLen) : 0;
+    var costLED = ledRolls * PRICE.ledRoll;
 
+    var mounts = state.light ? Math.ceil(per / PRICE.mountStep) : 0;
+    var costMounts = mounts * PRICE.mount;
+
+    var costBlock = state.light ? PRICE.block : 0;
+    var costSwitch = state.light ? PRICE.switch : 0;
+    var costDelivery = PRICE.delivery;
+
+    /* Доплата по высоте — не участвует в наценке */
+    var surcharge = heightSurcharge(heightCm);
+
+    /* Установка — добавляется к цене по себестоимости,
+       клиенту отдельная строка не показывается */
+    var instArea = area;
     var costInstall = 0;
     if (state.install) {
-      if (state.light) {
-        var baseInst;
-        if (installArea <= 2) {
-          baseInst = Math.max(2000, installArea * 1300);
-        } else {
-          baseInst = installArea * 1500;
-        }
-        costInstall = Math.max(2500, baseInst + 500);
+      var instBase;
+      if (instArea <= 2) {
+        instBase = Math.max(2000, instArea * 1300);
       } else {
-        if (installArea <= 2) {
-          costInstall = Math.max(2000, installArea * 1300);
-        } else {
-          costInstall = installArea * 1500;
-        }
+        instBase = instArea * 1500;
       }
+      costInstall = state.light ? Math.max(2500, instBase + 500) : instBase;
     }
 
-    var price;
-    var profitMirror;
-    if (state.light) {
-      var mirrorMarkup = isFigured ? 1.7 : 1.5;
-      price = totalMirrorCost * (1 + mirrorMarkup) + costEdge + delivery + costFacet + facetDelivery + costLED + costBlock + costSwitch + costAngle + costAngleDel + costFilm + costHeat + costInstall;
-      profitMirror = totalMirrorCost * mirrorMarkup;
-    } else {
-      var markupRate = isFigured ? 1.0 : 0.7;
-      price = (costMirror + costEdge) * (1 + markupRate) + cuttingCost + delivery + costFacet + facetDelivery + costFilm + costHeat + costInstall;
-      profitMirror = (costMirror + costEdge) * markupRate;
-    }
-    var profitInstall = costInstall;
-    var totalProfit = profitMirror + profitInstall;
+    var extras = costLED + costBlock + costSwitch + costMounts + costDelivery + surcharge + costInstall;
+
+    /* 7. Итоговая цена для клиента */
+    var price = baseCost + markup + extras;
+
+    /* 8. Полная себестоимость */
+    var totalCost = baseCost + extras;
+
+    /* 9. Общая прибыль (равна наценке) */
+    var totalProfit = price - totalCost;
 
     var sizeText = '';
     if (state.shape === 'circle') {
@@ -607,28 +623,40 @@
     } else {
       sizeText = h + ' × ' + w + ' см · ' + SHAPE_NAMES[state.shape];
     }
-    document.getElementById('r-size').textContent = sizeText + (state.light ? ' · С подсветкой' : ' · Без подсветки');
-
-    document.getElementById('r-sum').textContent = fmt(price) + ' ₽';
-
-    var inc = '<div class="row"><span>Зеркало (' + SHAPE_NAMES[state.shape].toLowerCase() + ')</span></div>';
-    inc += '<div class="row"><span>Обработка кромки от пореза</span></div>';
-    if (state.light) {
-      inc += '<div class="row"><span>LED-подсветка COB</span></div>';
-      inc += '<div class="row"><span>Блок питания + выключатель</span></div>';
-      inc += '<div class="row"><span>Алюминиевый каркас из уголка 1,5 мм</span></div>';
-    }
-    inc += '<div class="row"><span>Доставка по Ставрополю</span></div>';
-    if (costFacet > 0) inc += '<div class="row"><span>Фацет ' + state.facet + ' мм</span></div>';
-    if (costInstall > 0) inc += '<div class="row"><span>Установка</span></div>';
-    if (costFilm > 0) inc += '<div class="row"><span>Бронеплёнка</span></div>';
-    if (costHeat > 0) inc += '<div class="row"><span>Подогрев 40×60 см</span></div>';
-
-    document.getElementById('r-inc').innerHTML = inc;
-
+    /* ---------- Клиентский результат ----------
+       Показываем только размер, форму, подсветку и опции.
+       Себестоимость, наценка, комплектующие, доставка,
+       доплаты и прибыль — только во внутреннем расчёте выше. */
     var CLR_LABELS = { warm: 'тёплый', cold: 'холодный', neutral: 'нейтральный' };
     var CTRL_LABELS = { wave: 'взмах рукой', touch: 'сенсор на зеркале', remote: 'пульт ДУ', smart: 'Wi-Fi / умный дом' };
     var FACET_LABELS = { none: 'без фацета', '10': 'фацет 10 мм', '20': 'фацет 20 мм', '25': 'фацет 25 мм' };
+
+    document.getElementById('r-size').textContent = sizeText;
+
+    document.getElementById('r-sum').textContent = fmt(price) + ' ₽';
+
+    function row(label, value) {
+      return '<div class="row"><span>' + label + '</span><i class="dash"></i><span>' + value + '</span></div>';
+    }
+
+    var inc = '';
+    if (state.light) {
+      inc += row('Подсветка', 'LED COB, ' + CLR_LABELS[state.clr] + ' свет');
+      inc += row('Управление', CTRL_LABELS[state.ctrl]);
+    } else {
+      inc += row('Подсветка', 'нет');
+    }
+    inc += row('Кромка', state.facet === 'none' ? 'шлифовка от порезов' : FACET_LABELS[state.facet]);
+    if (state.install) {
+      inc += row('Установка', state.film ? 'на крепёж, с бронеплёнкой' : 'на крепёж');
+    } else if (state.film) {
+      inc += row('Бронеплёнка', 'да');
+    }
+    if (state.heat) {
+      inc += row('Подогрев 40×60 см', 'да');
+    }
+
+    document.getElementById('r-inc').innerHTML = inc;
 
     var details = [];
     if (state.light) {
@@ -669,7 +697,13 @@
     r.addEventListener('change', onFacetChange);
   });
   $all('input[name="option"][value="install"]').forEach(function (r) {
-    r.addEventListener('change', function () { readState(); updateFilmAvailability(); });
+    r.addEventListener('change', function () {
+      readState();
+      updateFilmAvailability();
+      /* Мгновенный пересчёт итоговой цены, если результат уже показан */
+      var res = document.getElementById('calc-result');
+      if (res && res.classList.contains('show')) calc();
+    });
   });
   $all('.stepper-btn').forEach(function (b) {
     b.addEventListener('click', function () {
