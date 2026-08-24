@@ -165,9 +165,12 @@
     mount: 50,
     mountStep: 2,
     delivery: 300,
+    facetDelivery: 1000,
     surchargeMid: 1200,
     surchargeHigh: 3000
   };
+
+  var FACET_RATES = { '10': 200, '20': 250, '25': 300 };
 
   /* Доплата по высоте: до 200 см — 0; свыше 200 и до 250 включительно — +1200 ₽;
      выше 250 см — только +3000 ₽ (доплаты не складываются) */
@@ -558,6 +561,43 @@
     var area = geo.area;
     var per = geo.per;
 
+    var price;
+
+    if (!state.light) {
+      /* Зеркало БЕЗ подсветки:
+         без фацета — (S×1500 + P×150) × 1,8
+         с фацетом — (S×1500 + P×фацет) × 1,8 + 1000 (доставка)
+         при высоте более 250 см — ещё +1000 */
+      var heightPlainCm = parseFloat(document.getElementById('height').value) || 0;
+      var basePlain = area * PRICE.mirror + per * PRICE.edge;
+      if (state.facet === 'none') {
+        price = basePlain * 1.8;
+      } else {
+        var facetRate = FACET_RATES[state.facet] || 0;
+        price = (area * PRICE.mirror + per * facetRate) * 1.8 + PRICE.facetDelivery;
+      }
+      if (heightPlainCm > 250) {
+        price += 1000;
+      }
+      if (state.install) {
+        price += (area <= 2) ? Math.max(2000, area * 1300) : area * 1500;
+      }
+    } else {
+
+    if (state.facet !== 'none') {
+      /* Зеркало С ПОДСВЕТКОЙ и фацетом: (S×1500 + P×фацет) × 2 + 1000 (доставка);
+         при высоте более 250 см — ещё +1000 */
+      var heightFacetCm = parseFloat(document.getElementById('height').value) || 0;
+      price = (area * PRICE.mirror + per * (FACET_RATES[state.facet] || 0)) * 2 + PRICE.facetDelivery;
+      if (heightFacetCm > 250) {
+        price += 1000;
+      }
+      if (state.install) {
+        var instBaseFacet = (area <= 2) ? Math.max(2000, area * 1300) : area * 1500;
+        price += Math.max(2500, instBaseFacet + 500);
+      }
+    } else {
+
     /* Высота для доплаты — по первому размеру в форме (поле «Высота»).
        Ширина на доплату не влияет. */
     var heightCm = parseFloat(document.getElementById('height').value) || 0;
@@ -606,13 +646,15 @@
     var extras = costLED + costBlock + costSwitch + costMounts + costDelivery + surcharge + costInstall;
 
     /* 7. Итоговая цена для клиента */
-    var price = baseCost + markup + extras;
+    price = baseCost + markup + extras;
 
     /* 8. Полная себестоимость */
     var totalCost = baseCost + extras;
 
     /* 9. Общая прибыль (равна наценке) */
     var totalProfit = price - totalCost;
+    }
+    }
 
     var sizeText = '';
     if (state.shape === 'circle') {
