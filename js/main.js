@@ -172,6 +172,11 @@
 
   var FACET_RATES = { '10': 200, '20': 250, '25': 300 };
 
+  /* Надбавка за фигурную форму (круг, овал, полукруг): +70 ₽ к погонному метру */
+  function shapeMeterSurcharge(shape) {
+    return (shape === 'circle' || shape === 'oval' || shape === 'semicircle') ? 95 : 0;
+  }
+
   /* Доплата по высоте: до 200 см — 0; свыше 200 и до 250 включительно — +1200 ₽;
      выше 250 см — только +3000 ₽ (доплаты не складываются) */
   function heightSurcharge(hCm) {
@@ -519,20 +524,20 @@
       per = 2 * (w + h) / 100;
       maxD = Math.max(w, h);
     } else if (shape === 'circle') {
+      /* Круг вырезается из квадрата: S = d×d, P = 4d */
       var d = w;
-      area = Math.PI * (d / 2) * (d / 2) / 10000;
-      per = Math.PI * d / 100;
+      area = (d * d) / 10000;
+      per = (4 * d) / 100;
       maxD = d;
     } else if (shape === 'oval') {
-      var a = w / 2, b = h / 2;
-      area = Math.PI * a * b / 10000;
-      per = (Math.PI / 2) * (3 * (w + h) - Math.sqrt((3 * w + h) * (w + 3 * h))) / 100;
+      /* Овал вырезается из прямоугольника: S = w×h, P = 2(w+h) */
+      area = (w * h) / 10000;
+      per = (2 * (w + h)) / 100;
       maxD = Math.max(w, h);
     } else if (shape === 'semicircle') {
-      var r = h / 2;
-      var rectW = Math.max(0, w - r);
-      area = (rectW * h + Math.PI * r * r / 2) / 10000;
-      per = (h + rectW * 2 + Math.PI * r) / 100;
+      /* Полукруг вырезается из прямоугольника: S = w×h, P = 2(w+h) */
+      area = (w * h) / 10000;
+      per = (2 * (w + h)) / 100;
       maxD = Math.max(w, h);
     } else if (shape === 'double') {
       var h2v = parseFloat(document.getElementById('height2').value) || 0;
@@ -569,12 +574,13 @@
          с фацетом — (S×1500 + P×фацет) × 1,8 + 1000 (доставка)
          при высоте более 250 см — ещё +1000 */
       var heightPlainCm = parseFloat(document.getElementById('height').value) || 0;
-      var basePlain = area * PRICE.mirror + per * PRICE.edge;
+      var meterExtra = shapeMeterSurcharge(state.shape);
+      var basePlain = area * PRICE.mirror + per * (PRICE.edge + meterExtra);
       if (state.facet === 'none') {
         price = basePlain * 1.8;
       } else {
         var facetRate = FACET_RATES[state.facet] || 0;
-        price = (area * PRICE.mirror + per * facetRate) * 1.8 + PRICE.facetDelivery;
+        price = (area * PRICE.mirror + per * (facetRate + meterExtra)) * 1.8 + PRICE.facetDelivery;
       }
       if (heightPlainCm > 250) {
         price += 1000;
@@ -588,7 +594,8 @@
       /* Зеркало С ПОДСВЕТКОЙ и фацетом: (S×1500 + P×фацет) × 2 + 1000 (доставка);
          при высоте более 250 см — ещё +1000 */
       var heightFacetCm = parseFloat(document.getElementById('height').value) || 0;
-      price = (area * PRICE.mirror + per * (FACET_RATES[state.facet] || 0)) * 2 + PRICE.facetDelivery;
+      var meterExtraLight = shapeMeterSurcharge(state.shape);
+      price = (area * PRICE.mirror + per * ((FACET_RATES[state.facet] || 0) + meterExtraLight)) * 2 + PRICE.facetDelivery;
       if (heightFacetCm > 250) {
         price += 1000;
       }
@@ -607,8 +614,8 @@
     /* 3. Себестоимость зеркала */
     var costMirror = area * PRICE.mirror;
 
-    /* 4. Обработка кромки от порезов */
-    var costEdge = per * PRICE.edge;
+    /* 4. Обработка кромки от порезов (+50 ₽/пог.м для фигурных форм) */
+    var costEdge = per * (PRICE.edge + shapeMeterSurcharge(state.shape));
 
     var baseCost = costMirror + costEdge;
 
