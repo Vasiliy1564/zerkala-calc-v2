@@ -663,6 +663,15 @@
     }
     }
 
+    /* Бронеплёнка: 120 ₽/м² по площади прямоугольника */
+    if (state.film) {
+      price += geo.area * 120;
+    }
+    /* Подогрев: фиксированная доплата */
+    if (state.heat) {
+      price += 2500;
+    }
+
     var sizeText = '';
     if (state.shape === 'circle') {
       sizeText = 'Ø ' + w + ' см · ' + SHAPE_NAMES[state.shape];
@@ -698,8 +707,9 @@
     inc += row('Кромка', state.facet === 'none' ? 'шлифовка от порезов' : FACET_LABELS[state.facet]);
     if (state.install) {
       inc += row('Установка', state.film ? 'на крепёж, с бронеплёнкой' : 'на крепёж');
-    } else if (state.film) {
-      inc += row('Бронеплёнка', 'да');
+    }
+    if (state.film) {
+      inc += row('Бронеплёнка', geo.area.toFixed(2) + ' м² × 120 ₽');
     }
     if (state.heat) {
       inc += row('Подогрев 40×60 см', 'да');
@@ -750,6 +760,13 @@
       readState();
       updateFilmAvailability();
       /* Мгновенный пересчёт итоговой цены, если результат уже показан */
+      var res = document.getElementById('calc-result');
+      if (res && res.classList.contains('show')) calc();
+    });
+  });
+  $all('input[name="option"][value="film"], input[name="option"][value="heat"]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      readState();
       var res = document.getElementById('calc-result');
       if (res && res.classList.contains('show')) calc();
     });
