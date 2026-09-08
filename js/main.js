@@ -589,78 +589,49 @@
         price += (area <= 2) ? Math.max(2000, area * 1300) : area * 1500;
       }
     } else {
+      /* Зеркало С ПОДСВЕТКОЙ — единый расчёт для фацета и без него.
+         При выборе фацета ставка обработки кромки заменяется ставкой
+         фацета (200/250/300 ₽/пог.м), а доставка растёт до 1000 ₽.
+         LED-комплектация (лента, блок, сенсор, крепёж) считается всегда. */
 
-    if (state.facet !== 'none') {
-      /* Зеркало С ПОДСВЕТКОЙ и фацетом: (S×1500 + P×фацет) × 2 + 1000 (доставка);
-         при высоте более 250 см — ещё +1000 */
-      var heightFacetCm = parseFloat(document.getElementById('height').value) || 0;
       var meterExtraLight = shapeMeterSurcharge(state.shape);
-      price = (area * PRICE.mirror + per * ((FACET_RATES[state.facet] || 0) + meterExtraLight)) * 2 + PRICE.facetDelivery;
-      if (heightFacetCm > 250) {
-        price += 1000;
-      }
+      var facetRateLight = (state.facet === 'none')
+        ? PRICE.edge
+        : (FACET_RATES[state.facet] || 0);
+
+      /* Себестоимость зеркала */
+      var costMirrorLight = area * PRICE.mirror;
+
+      /* Обработка кромки: шлифовка или фацет */
+      var costEdgeLight = per * (facetRateLight + meterExtraLight);
+
+      var baseCostLight = costMirrorLight + costEdgeLight;
+
+      /* Наценка 150% на зеркало + обработку */
+      var markupLight = baseCostLight * PRICE.markup;
+
+      /* Дополнительные расходы — без наценки */
+      var ledRollsLight = Math.ceil(per / PRICE.ledRollLen);
+      var costLEDLight = ledRollsLight * PRICE.ledRoll;
+      var mountsLight = Math.ceil(per / PRICE.mountStep);
+      var costMountsLight = mountsLight * PRICE.mount;
+      var costBlockLight = PRICE.block;
+      var costSwitchLight = PRICE.switch;
+      var costDeliveryLight = (state.facet === 'none') ? PRICE.delivery : PRICE.facetDelivery;
+
+      var heightLightCm = parseFloat(document.getElementById('height').value) || 0;
+      var surchargeLight = heightSurcharge(heightLightCm);
+
+      var costInstallLight = 0;
       if (state.install) {
-        var instBaseFacet = (area <= 2) ? Math.max(2000, area * 1300) : area * 1500;
-        price += Math.max(2500, instBaseFacet + 500);
+        var instBaseLight = (area <= 2) ? Math.max(2000, area * 1300) : area * 1500;
+        costInstallLight = Math.max(2500, instBaseLight + 500);
       }
-    } else {
 
-    /* Высота для доплаты — по первому размеру в форме (поле «Высота»).
-       Ширина на доплату не влияет. */
-    var heightCm = parseFloat(document.getElementById('height').value) || 0;
+      var extrasLight = costLEDLight + costBlockLight + costSwitchLight
+        + costMountsLight + costDeliveryLight + surchargeLight + costInstallLight;
 
-    /* 1–2. Площадь и периметр уже посчитаны в geo */
-
-    /* 3. Себестоимость зеркала */
-    var costMirror = area * PRICE.mirror;
-
-    /* 4. Обработка кромки от порезов (+50 ₽/пог.м для фигурных форм) */
-    var costEdge = per * (PRICE.edge + shapeMeterSurcharge(state.shape));
-
-    var baseCost = costMirror + costEdge;
-
-    /* 5. Наценка 150% на зеркало + обработку */
-    var markup = baseCost * PRICE.markup;
-
-    /* 6. Дополнительные расходы — без наценки, по себестоимости */
-    var ledRolls = state.light ? Math.ceil(per / PRICE.ledRollLen) : 0;
-    var costLED = ledRolls * PRICE.ledRoll;
-
-    var mounts = state.light ? Math.ceil(per / PRICE.mountStep) : 0;
-    var costMounts = mounts * PRICE.mount;
-
-    var costBlock = state.light ? PRICE.block : 0;
-    var costSwitch = state.light ? PRICE.switch : 0;
-    var costDelivery = PRICE.delivery;
-
-    /* Доплата по высоте — не участвует в наценке */
-    var surcharge = heightSurcharge(heightCm);
-
-    /* Установка — добавляется к цене по себестоимости,
-       клиенту отдельная строка не показывается */
-    var instArea = area;
-    var costInstall = 0;
-    if (state.install) {
-      var instBase;
-      if (instArea <= 2) {
-        instBase = Math.max(2000, instArea * 1300);
-      } else {
-        instBase = instArea * 1500;
-      }
-      costInstall = state.light ? Math.max(2500, instBase + 500) : instBase;
-    }
-
-    var extras = costLED + costBlock + costSwitch + costMounts + costDelivery + surcharge + costInstall;
-
-    /* 7. Итоговая цена для клиента */
-    price = baseCost + markup + extras;
-
-    /* 8. Полная себестоимость */
-    var totalCost = baseCost + extras;
-
-    /* 9. Общая прибыль (равна наценке) */
-    var totalProfit = price - totalCost;
-    }
+      price = baseCostLight + markupLight + extrasLight;
     }
 
     /* Бронеплёнка: 120 ₽/м² по площади прямоугольника */
