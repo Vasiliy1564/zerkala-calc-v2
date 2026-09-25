@@ -1,7 +1,7 @@
 /* ============================================================
    ЗЕРКАЛА ПРО — дизайн ARCO
    Интерактив + калькулятор (прайс: зеркало 1500 ₽/м², обработка
-   150 ₽/пог.м, наценка 150% при подсветке, доплата по высоте)
+   150 ₽/пог.м, наценка 150% при подсветке)
    ============================================================ */
 (function () {
   'use strict';
@@ -165,9 +165,7 @@
     mount: 50,
     mountStep: 2,
     delivery: 300,
-    facetDelivery: 1000,
-    surchargeMid: 1200,
-    surchargeHigh: 3000
+    facetDelivery: 1000
   };
 
   var FACET_RATES = { '10': 200, '20': 250, '25': 300 };
@@ -177,14 +175,14 @@
     return (shape === 'circle' || shape === 'oval' || shape === 'semicircle') ? 95 : 0;
   }
 
-  /* Доплата по высоте: до 200 см — 0; свыше 200 и до 250 включительно — +1200 ₽;
-     выше 250 см — только +3000 ₽ (доплаты не складываются) */
-  function heightSurcharge(hCm) {
-    if (hCm <= 200) return 0;
-    if (hCm <= 250) return PRICE.surchargeMid;
-    return PRICE.surchargeHigh;
+  /* Доплата за высоту: до 200 см включительно — 0 ₽,
+     201–250 см включительно — 1200 ₽, выше 250 см — 3000 ₽.
+     Для формы double учитывается суммарная высота: height + height2. */
+  function heightSurcharge(totalH) {
+    if (totalH <= 200) return 0;
+    if (totalH <= 250) return 1200;
+    return 3000;
   }
-
   function fmt(n) { return Math.round(n).toLocaleString('ru-RU'); }
 
   function readState() {
@@ -311,8 +309,8 @@
     var clr = state.clr;
     var facet = state.facet;
 
-    var colors = { warm: '#ffb347', cold: '#4facfe', neutral: '#e0e0e0' };
-    var glowColor = colors[clr] || '#00d9a3';
+    var colors = { warm: '#ffd28a', cold: '#bbddff', neutral: '#ffffff' };
+    var glowColor = colors[clr] || colors.neutral;
     var facetW = { none: 0, 10: 3, 20: 6, 25: 8 }[facet] || 0;
 
     var cx = VB_W / 2;
@@ -424,7 +422,61 @@
     var defs = svg.querySelector('defs');
     svg.innerHTML = '';
     if (defs) svg.appendChild(defs);
-    svg.insertAdjacentHTML('beforeend', content);
+    // Keep the calculated outlines, replacing decorative shapes with a shared
+    // photographic reflection. Split mirrors reflect the same continuous room.
+    var draft = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    draft.innerHTML = content;
+    var bodies = draft.querySelectorAll('[fill="url(#glassGrad)"]');
+    var clipShapes = '';
+    var edges = '';
+    var halos = '';
+    bodies.forEach(function (body) {
+      var outline = body.cloneNode(true);
+      outline.removeAttribute('class');
+      outline.removeAttribute('fill');
+      outline.removeAttribute('stroke');
+      outline.removeAttribute('stroke-width');
+      clipShapes += outline.outerHTML;
+      outline.setAttribute('fill', 'none');
+      if (hasLight) {
+        outline.setAttribute('stroke', glowColor);
+        outline.setAttribute('stroke-width', '8');
+        outline.setAttribute('filter', 'url(#realMirrorHalo)');
+        halos += outline.outerHTML;
+        outline.removeAttribute('filter');
+      }
+      outline.setAttribute('stroke', '#707a74');
+      outline.setAttribute('stroke-width', '1.2');
+      edges += outline.outerHTML;
+      outline.setAttribute('stroke', '#edf0e9');
+      outline.setAttribute('stroke-width', '0.45');
+      edges += outline.outerHTML;
+      if (facetW) {
+        outline.setAttribute('stroke', '#f5f6ef');
+        outline.setAttribute('stroke-width', String(facetW));
+        outline.setAttribute('opacity', '0.35');
+        outline.setAttribute('clip-path', 'url(#realMirrorClip)');
+        edges += outline.outerHTML;
+      }
+      if (hasLight) {
+        // A crisp LED band remains visible over the reflection; its halo alone
+        // is insufficient on a pale wall. Both follow the selected temperature.
+        outline.removeAttribute('opacity');
+        outline.setAttribute('clip-path', 'url(#realMirrorClip)');
+        outline.setAttribute('stroke', glowColor);
+        outline.setAttribute('stroke-width', '4');
+        outline.setAttribute('class', 'mirror-led-band');
+        edges += outline.outerHTML;
+      }
+    });
+    svg.insertAdjacentHTML('beforeend',
+      '<defs><clipPath id="realMirrorClip">' + clipShapes + '</clipPath>' +
+      '<filter id="realMirrorHalo" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4"/></filter>' +
+      '<linearGradient id="realMirrorSheen" x2="1" y2="1"><stop stop-color="#f5fbff" stop-opacity=".22"/><stop offset=".38" stop-color="#fff" stop-opacity=".03"/><stop offset=".52" stop-color="#fff" stop-opacity=".13"/><stop offset=".68" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#78958a" stop-opacity=".16"/></linearGradient></defs>' +
+      halos + '<g clip-path="url(#realMirrorClip)">' +
+      '<rect width="170" height="240" fill="#d7dbd3"/>' +
+      '<image href="assets/mirror-reflection.png" width="170" height="240" preserveAspectRatio="xMidYMid slice" opacity=".88"/>' +
+      '<rect width="170" height="240" fill="url(#realMirrorSheen)"/></g>' + edges);
   }
 
   function pickShape(shape) {
@@ -565,15 +617,19 @@
     var geo = calcGeometry();
     var area = geo.area;
     var per = geo.per;
+    // База для двух частей — цельный прямоугольник тех же общих размеров.
+    if (state.shape === 'double') {
+      var combinedHeight = h + (parseFloat(document.getElementById('height2').value) || 0);
+      area = w * combinedHeight / 10000;
+      per = 2 * (w + combinedHeight) / 100;
+    }
 
     var price;
 
     if (!state.light) {
       /* Зеркало БЕЗ подсветки:
          без фацета — (S×1500 + P×150) × 1,8
-         с фацетом — (S×1500 + P×фацет) × 1,8 + 1000 (доставка)
-         при высоте более 250 см — ещё +1000 */
-      var heightPlainCm = parseFloat(document.getElementById('height').value) || 0;
+         с фацетом — (S×1500 + P×фацет) × 1,8 + 1000 (доставка) */
       var meterExtra = shapeMeterSurcharge(state.shape);
       var basePlain = area * PRICE.mirror + per * (PRICE.edge + meterExtra);
       if (state.facet === 'none') {
@@ -581,9 +637,6 @@
       } else {
         var facetRate = FACET_RATES[state.facet] || 0;
         price = (area * PRICE.mirror + per * (facetRate + meterExtra)) * 1.8 + PRICE.facetDelivery;
-      }
-      if (heightPlainCm > 250) {
-        price += 1000;
       }
       if (state.install) {
         price += (area <= 2) ? Math.max(2000, area * 1300) : area * 1500;
@@ -619,9 +672,6 @@
       var costSwitchLight = PRICE.switch;
       var costDeliveryLight = (state.facet === 'none') ? PRICE.delivery : PRICE.facetDelivery;
 
-      var heightLightCm = parseFloat(document.getElementById('height').value) || 0;
-      var surchargeLight = heightSurcharge(heightLightCm);
-
       var costInstallLight = 0;
       if (state.install) {
         var instBaseLight = (area <= 2) ? Math.max(2000, area * 1300) : area * 1500;
@@ -629,10 +679,17 @@
       }
 
       var extrasLight = costLEDLight + costBlockLight + costSwitchLight
-        + costMountsLight + costDeliveryLight + surchargeLight + costInstallLight;
+        + costMountsLight + costDeliveryLight + costInstallLight;
 
       price = baseCostLight + markupLight + extrasLight;
     }
+
+    /* Доплата за высоту — для double по суммарной высоте (height + height2) */
+    var totalH = h;
+    if (state.shape === 'double') {
+      totalH += parseFloat(document.getElementById('height2').value) || 0;
+    }
+    price += heightSurcharge(totalH);
 
     /* Бронеплёнка: 120 ₽/м² по площади прямоугольника */
     if (state.film) {
@@ -641,6 +698,15 @@
     /* Подогрев: фиксированная доплата */
     if (state.heat) {
       price += 2500;
+    }
+
+    /* Налог +6% — применяется последним, ко всем расчётам */
+    price *= 1.06;
+    // Процент к цене цельного зеркала тех же размеров и комплектации.
+    // Контроль: 270×70 с LED без опций = 16469.75 ₽ до округления;
+    // 200×70 + 70×70 дороже на 2000 ₽. Для других размеров процент тот же.
+    if (state.shape === 'double') {
+      price *= 1 + 2000 / 16469.75;
     }
 
     var sizeText = '';
@@ -722,6 +788,13 @@
   });
   $all('input[name="clr"]').forEach(function (r) {
     r.addEventListener('change', function () { readState(); renderMirrorSvg(); });
+    r.addEventListener('click', function () {
+      var preview = document.querySelector('.calculator .calc-preview');
+      if (preview) preview.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block: 'center'
+      });
+    });
   });
   $all('input[name="facet"]').forEach(function (r) {
     r.addEventListener('change', onFacetChange);
