@@ -101,6 +101,42 @@ header.container{position:relative;z-index:30}
 .story-layout>img{border-radius:14px 140px 14px 14px;filter:saturate(.78)}
 .story-copy h3{font-family:var(--serif);font-size:48px}
 
+.projects-showcase{background:var(--surface)}
+.projects-head{padding-bottom:30px;border-bottom:1px solid var(--line)}
+.project-filters{gap:10px;margin:-18px 0 34px}
+.project-filters .filter{min-height:42px;padding:9px 17px;border:1px solid #b8c1bb;border-radius:999px;background:transparent;color:var(--brand);font-size:13px;font-weight:600}
+.project-filters .filter:hover{border-color:var(--brand);background:#edf0ec}
+.project-filters .filter.active{border-color:var(--brand);background:var(--brand);color:#fff}
+.projects-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:92px;grid-auto-flow:dense;gap:16px}
+.projects-grid .project{position:relative;display:block;width:100%;min-width:0;min-height:0;padding:0;overflow:hidden;border:0;border-radius:14px;background:#dfe4df;color:#fff;cursor:zoom-in;text-align:left;box-shadow:none}
+.projects-grid .project--feature{grid-column:span 7;grid-row:span 5;border-radius:140px 14px 14px 14px}
+.projects-grid .project--portrait{grid-column:span 5;grid-row:span 5}
+.projects-grid .project--gold-portrait{grid-column:span 5;grid-row:span 6}
+.projects-grid .project--gold-wide{grid-column:span 7;grid-row:span 6}
+.projects-grid .project--compact-photo{grid-column:span 5;grid-row:span 4}
+.projects-grid .project--landscape{grid-column:span 7;grid-row:span 4}
+.projects-grid .project--wide-photo{grid-column:span 12;grid-row:span 5}
+.projects-grid .project--tall-photo{grid-column:span 6;grid-row:span 6}
+.projects-grid .project--third{grid-column:span 4;grid-row:span 6}
+.projects-grid .project img{display:block;width:100%;height:100%;object-fit:cover;filter:saturate(.82);transition:transform .55s ease,filter .55s ease}
+.projects-grid .project--feature img{object-position:center}
+.projects-grid .project--portrait img{object-position:center 46%}
+.projects-grid .project--gold-portrait img{object-position:center}
+.projects-grid .project--gold-wide img{object-position:center}
+.projects-grid .project--compact-photo img{object-position:center}
+.projects-grid .project--landscape img{object-position:center}
+.projects-grid .project--wide-photo img{object-position:center 52%}
+.projects-grid .project--tall-photo img{object-position:center}
+.projects-grid .project--third img{object-position:center}
+.projects-grid .project:after{content:'';position:absolute;inset:auto 0 0;height:38%;border-radius:0;background:linear-gradient(to top,rgba(10,20,17,.68),transparent);pointer-events:none}
+.projects-grid .project-info{position:absolute;z-index:2;inset:auto 22px 19px;display:flex;align-items:end;justify-content:space-between;gap:20px;color:#fff;font-size:12px;line-height:1.35;opacity:1;transform:none;pointer-events:none}
+.projects-grid .project-info strong{font-family:var(--serif);font-size:20px;font-weight:400}
+.projects-grid .project-info span{max-width:130px;text-align:right;color:rgba(255,255,255,.78)}
+.projects-grid .project:hover img{transform:scale(1.025);filter:saturate(1)}
+.projects-grid .project:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+.projects-action{display:flex;align-items:center;justify-content:space-between;gap:30px;margin-top:34px;padding-top:28px;border-top:1px solid var(--line)}
+.projects-action p{max-width:520px;color:#59665f;font-size:16px}
+
 .avito-reviews{background:#e9ede8}
 .avito-review{border:0;border-radius:14px;background:#fff;box-shadow:none}
 .avito-review blockquote{font-family:var(--serif);font-size:19px;line-height:1.55}
@@ -117,6 +153,10 @@ header.container{position:relative;z-index:30}
 .field label{font-size:14px}
 .options label{min-height:44px;display:inline-flex;align-items:center;border-radius:7px;background:#f7f8f5;font-size:14px}
 .options label:has(input:checked){background:var(--brand);border-color:var(--brand)}
+.semidouble-choice>span{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%}
+.calc-shape-icon{position:relative;display:inline-block;flex:0 0 auto;color:currentColor}
+.calc-shape-icon--semidouble{width:15px;height:25px;border:1.5px solid currentColor;border-radius:15px 0 0 15px}
+.calc-shape-icon--semidouble:after{content:'';position:absolute;left:-1px;right:-1px;top:50%;border-top:1.5px solid currentColor;transform:translateY(-50%)}
 .stepper{border-radius:7px;background:#f7f8f5}
 .calc-result{border-radius:12px;background:#edf1ec;border:1px solid #d7ddd7}
 .calc-result strong{color:var(--brand);font-family:var(--serif);font-size:38px;font-weight:400}
@@ -125,6 +165,13 @@ header.container{position:relative;z-index:30}
 .calc-btn-call:hover{background:var(--brand-hover)}
 .calc-btn-max{color:var(--brand);border-color:var(--brand)}
 .calc-btn-max:hover{background:var(--brand)}
+.region-delivery-note{margin:18px 0;padding:20px;border:1px solid #c9d1cb;border-radius:12px;background:#f7f8f5;color:#4d5a54}
+.region-delivery-title{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:14px;border-bottom:1px solid #d9ded9}
+.region-delivery-title span{color:var(--accent);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.region-delivery-title strong{color:var(--brand);font-family:var(--serif);font-size:20px;font-weight:400;text-align:right}
+.region-delivery-options{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:16px}
+.region-delivery-options p{margin:0;color:#5e6963;font-size:13px;line-height:1.6}
+.region-delivery-options b{display:block;margin-bottom:5px;color:var(--brand);font-size:14px}
 
 .process{background:var(--surface)}
 .step-num{background:var(--brand);border-color:var(--brand);color:#fff}
@@ -151,6 +198,7 @@ header.container{position:relative;z-index:30}
   .hero:after{background:linear-gradient(180deg,#e8ece7 0%,#e8ece7 52%,rgba(232,236,231,.22) 74%,rgba(232,236,231,0) 100%)}
   .hero-tag{bottom:18px;right:18px}.intro{grid-template-columns:1fr;gap:28px;padding:70px 0}
   .product img{height:330px}.story-layout{gap:42px}.section-head{align-items:start}
+  .projects-grid{grid-auto-rows:76px;gap:12px}.projects-grid .project--feature{grid-column:span 7}.projects-grid .project--portrait{grid-column:span 5}.projects-grid .project--tall-photo,.projects-grid .project--third{grid-row:span 5}
 }
 
 @media(max-width:620px){
@@ -166,7 +214,8 @@ header.container{position:relative;z-index:30}
   .product-grid{grid-template-columns:1fr;gap:42px}.product img{height:340px}.product:nth-child(1) img,.product:nth-child(4) img{border-radius:100px 12px 12px 12px}
   .product h3{font-size:27px}.product p{font-size:15px}.numbers-grid{gap:28px}.numbers-label{font-size:26px}
   .benefits-grid{grid-template-columns:1fr}.benefit{min-height:140px}.story-copy h3{font-size:38px}
-  .calc-form{padding:20px 15px}.options label{font-size:13px}.quote-aside img,.about-image img{border-radius:75px 12px 12px 12px}
+  .projects-head{padding-bottom:22px}.project-filters{margin:-8px 0 28px;flex-wrap:nowrap;overflow-x:auto;padding:0 0 8px;scrollbar-width:none}.project-filters::-webkit-scrollbar{display:none}.project-filters .filter{flex:0 0 auto;white-space:nowrap}.projects-grid{display:grid;grid-template-columns:1fr;grid-auto-rows:auto;gap:14px}.projects-grid .project,.projects-grid .project--feature,.projects-grid .project--portrait,.projects-grid .project--gold-portrait,.projects-grid .project--gold-wide,.projects-grid .project--compact-photo,.projects-grid .project--landscape,.projects-grid .project--wide-photo,.projects-grid .project--tall-photo,.projects-grid .project--third{grid-column:1;grid-row:auto;border-radius:12px;aspect-ratio:4/3}.projects-grid .project--feature{border-radius:80px 12px 12px 12px;aspect-ratio:1/1}.projects-grid .project--portrait,.projects-grid .project--gold-portrait,.projects-grid .project--tall-photo,.projects-grid .project--third{aspect-ratio:3/4}.projects-grid .project-info{inset:auto 15px 14px}.projects-grid .project-info strong{font-size:18px}.projects-action{display:block;margin-top:26px}.projects-action .button{width:100%;margin-top:18px}
+  .calc-form{padding:20px 15px}.options label{font-size:13px}.region-delivery-title{display:block}.region-delivery-title strong{display:block;margin-top:5px;text-align:left}.region-delivery-options{grid-template-columns:1fr;gap:14px}.quote-aside img,.about-image img{border-radius:75px 12px 12px 12px}
 }
 
 @media(prefers-reduced-motion:reduce){.product img{transition:none}}
