@@ -142,6 +142,7 @@
     facet: 'none',
     film: false,
     heat: false,
+    delivery: false,
     install: false
   };
 
@@ -172,7 +173,7 @@
     facetDelivery: 1000
   };
 
-  var FACET_RATES = { '10': 200, '20': 250, '25': 300 };
+  var FACET_RATES = { grind: 200, '10': 200, '20': 250, '25': 300 };
 
   /* Надбавка за фигурную форму к погонному метру обработки кромки */
   function shapeMeterSurcharge(shape) {
@@ -207,6 +208,7 @@
     state.film = opt('film');
     state.heat = opt('heat');
     state.install = opt('install');
+    state.delivery = opt('delivery');
   }
 
   function adj(id, delta) {
@@ -320,7 +322,7 @@
 
     var colors = { warm: '#ffd28a', cold: '#bbddff', neutral: '#ffffff' };
     var glowColor = colors[clr] || colors.neutral;
-    var facetW = { none: 0, 10: 3, 20: 6, 25: 8 }[facet] || 0;
+    var facetW = { none: 0, grind: 0, 10: 3, 20: 6, 25: 8 }[facet] || 0;
 
     var cx = VB_W / 2;
     var cy = VB_H / 2;
@@ -588,6 +590,9 @@
       if (state.facet === 'none') {
         info.textContent = 'Обработка кромки от пореза включена';
         info.classList.remove('gold');
+      } else if (state.facet === 'grind') {
+        info.textContent = 'Шлифовка';
+        info.classList.remove('gold');
       } else {
         info.textContent = 'Фацет ' + state.facet + ' мм';
         info.classList.add('gold');
@@ -687,7 +692,8 @@
          с фацетом — (S×1500 + P×фацет) × 1,8 + 1000 (доставка) */
       var meterExtra = shapeMeterSurcharge(state.shape);
       var basePlain = area * PRICE.mirror + edgePer * (PRICE.edge + meterExtra);
-      if (state.facet === 'none') {
+      if (state.facet === 'none' || state.facet === 'grind') {
+        if (state.facet === 'grind') basePlain = area * PRICE.mirror + edgePer * (FACET_RATES.grind + meterExtra);
         price = basePlain * 1.8;
       } else {
         var facetRate = FACET_RATES[state.facet] || 0;
@@ -725,7 +731,7 @@
       var costMountsLight = mountsLight * PRICE.mount;
       var costBlockLight = PRICE.block;
       var costSwitchLight = PRICE.switch;
-      var costDeliveryLight = (state.facet === 'none') ? PRICE.delivery : PRICE.facetDelivery;
+      var costDeliveryLight = (state.facet === 'none' || state.facet === 'grind') ? PRICE.delivery : PRICE.facetDelivery;
 
       var costInstallLight = 0;
       if (state.install) {
@@ -769,6 +775,12 @@
       price *= 1.2;
     }
 
+    /* Дополнительные 2% ко всем итоговым расчётам, до округления. */
+    price *= 1.02;
+
+    /* Доставка клиенту по Ставрополю: фиксированные 700 ₽. */
+    if (state.delivery) price += 700;
+
     var sizeText = '';
     if (state.shape === 'circle') {
       sizeText = 'Ø ' + w + ' см · ' + SHAPE_NAMES[state.shape];
@@ -784,7 +796,7 @@
        доплаты и прибыль — только во внутреннем расчёте выше. */
     var CLR_LABELS = { warm: 'тёплый', cold: 'холодный', neutral: 'нейтральный' };
     var CTRL_LABELS = { wave: 'взмах рукой', touch: 'сенсор на зеркале', remote: 'пульт ДУ', smart: 'Wi-Fi / умный дом' };
-    var FACET_LABELS = { none: 'без фацета', '10': 'фацет 10 мм', '20': 'фацет 20 мм', '25': 'фацет 25 мм' };
+    var FACET_LABELS = { none: 'без фацета', grind: 'шлифовка', '10': 'фацет 10 мм', '20': 'фацет 20 мм', '25': 'фацет 25 мм' };
 
     document.getElementById('r-size').textContent = sizeText;
 
@@ -801,7 +813,7 @@
     } else {
       inc += row('Подсветка', 'нет');
     }
-    inc += row('Кромка', state.facet === 'none' ? 'шлифовка от порезов' : FACET_LABELS[state.facet]);
+    inc += row('Кромка', state.facet === 'none' ? 'обработка от порезов' : FACET_LABELS[state.facet]);
     if (state.install) {
       inc += row('Установка', state.film ? 'на крепёж, с бронеплёнкой' : 'на крепёж');
     }
@@ -812,6 +824,7 @@
       inc += row('Подогрев 40×60 см', 'да');
     }
 
+    inc += row('Доставка', state.delivery ? 'по городу Ставрополю — 700 ₽' : 'не выбрана');
     document.getElementById('r-inc').innerHTML = inc;
 
     var details = [];
@@ -822,6 +835,7 @@
     }
     if (state.facet !== 'none') details.push(FACET_LABELS[state.facet]);
     if (state.install) details.push('с установкой');
+    if (state.delivery) details.push('с доставкой по городу Ставрополю за 700 ₽');
 
     var ctaText = '';
     if (state.shape === 'double') {
@@ -869,7 +883,7 @@
       if (res && res.classList.contains('show')) calc();
     });
   });
-  $all('input[name="option"][value="film"], input[name="option"][value="heat"]').forEach(function (r) {
+  $all('input[name="option"][value="film"], input[name="option"][value="heat"], input[name="option"][value="delivery"]').forEach(function (r) {
     r.addEventListener('change', function () {
       readState();
       var res = document.getElementById('calc-result');
