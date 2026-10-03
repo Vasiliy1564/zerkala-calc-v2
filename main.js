@@ -180,13 +180,10 @@
     return (shape === 'circle' || shape === 'oval' || shape === 'semicircle' || shape === 'semidouble') ? 95 : 0;
   }
 
-  /* Доплата за высоту: до 200 см включительно — 0 ₽,
-     201–250 см включительно — 1200 ₽, выше 250 см — 3000 ₽.
-     Для формы double учитывается суммарная высота: height + height2. */
+  /* Доплата за высоту свыше 200 см — 1350 ₽ для всех зеркал.
+     Для составных форм учитывается суммарная высота двух частей. */
   function heightSurcharge(totalH) {
-    if (totalH <= 200) return 0;
-    if (totalH <= 250) return 1200;
-    return 3000;
+    return totalH > 200 ? 1350 : 0;
   }
   function fmt(n) { return Math.round(n).toLocaleString('ru-RU'); }
 
