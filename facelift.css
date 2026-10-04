@@ -219,3 +219,6 @@ header.container{position:relative;z-index:30}
 }
 
 @media(prefers-reduced-motion:reduce){.product img{transition:none}}
+
+/* Фильтры галереи: скрытые карточки не занимают место. */
+.projects-grid .project[hidden]{display:none !important}
