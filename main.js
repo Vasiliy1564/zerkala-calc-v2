@@ -180,10 +180,13 @@
     return (shape === 'circle' || shape === 'oval' || shape === 'semicircle' || shape === 'semidouble') ? 95 : 0;
   }
 
-  /* Доплата за большую сторону свыше 200 см — 1350 ₽ для всех зеркал.
+  /* Доплата за большую сторону: до 200 см включительно — 0 ₽,
+     свыше 200 до 250 см включительно — 1200 ₽, выше 250 см — 3000 ₽.
      Перестановка высоты и ширины не меняет доплату. */
   function sizeSurcharge(maxDimension) {
-    return maxDimension > 200 ? 1350 : 0;
+    if (maxDimension <= 200) return 0;
+    if (maxDimension <= 250) return 1200;
+    return 3000;
   }
   function fmt(n) { return Math.round(n).toLocaleString('ru-RU'); }
 
