@@ -180,10 +180,14 @@
     return (shape === 'circle' || shape === 'oval' || shape === 'semicircle' || shape === 'semidouble') ? 95 : 0;
   }
 
-  /* Доплата за высоту свыше 200 см — 1350 ₽ для всех зеркал.
-     Для составных форм учитывается суммарная высота двух частей. */
-  function heightSurcharge(totalH) {
-    return totalH > 200 ? 1350 : 0;
+  /* Доплата за большую сторону: до 200 см включительно — 0 ₽,
+     свыше 200 до 250 см включительно — 1200 ₽, выше 250 см — 3000 ₽.
+     Перестановка высоты и ширины не меняет доплату. */
+  function sizeSurcharge(width, height) {
+    var maxDimension = Math.max(width, height);
+    if (maxDimension <= 200) return 0;
+    if (maxDimension <= 250) return 1200;
+    return 3000;
   }
   function fmt(n) { return Math.round(n).toLocaleString('ru-RU'); }
 
@@ -232,6 +236,13 @@
     var rowH2 = document.getElementById('rowH2');
     if (rowH2) rowH2.classList.toggle('hidden', state.shape !== 'double' && state.shape !== 'semidouble');
     updPreview();
+    // Обновляем уже показанную цену при вводе размеров и нажатии +/−.
+    var res = document.getElementById('calc-result');
+    var validSize = parseFloat(wEl.value) >= 40 && parseFloat(hEl.value) >= 40;
+    if (state.shape === 'double' || state.shape === 'semidouble') {
+      validSize = validSize && parseFloat(document.getElementById('height2').value) >= 40;
+    }
+    if (res && res.classList.contains('show') && validSize) calc(false);
   }
 
   function fitBox(aspect) {
@@ -654,7 +665,7 @@
     };
   }
 
-  function calc() {
+  function calc(scrollResult) {
     readState();
     var wEl = document.getElementById('width');
     var hEl = document.getElementById('height');
@@ -742,12 +753,12 @@
       price = baseCostLight + markupLight + extrasLight;
     }
 
-    /* Для составных форм доплата определяется по общей высоте двух частей. */
+    /* Сравниваем ширину с высотой; у составных форм — с общей высотой. */
     var totalH = h;
     if (state.shape === 'double' || state.shape === 'semidouble') {
       totalH += parseFloat(document.getElementById('height2').value) || 0;
     }
-    price += heightSurcharge(totalH);
+    price += sizeSurcharge(w, totalH);
 
     /* Бронеплёнка: 120 ₽/м² по площади прямоугольника */
     if (state.film) {
@@ -848,7 +859,7 @@
 
     var res = document.getElementById('calc-result');
     res.classList.add('show');
-    res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (scrollResult !== false) res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   /* ---------- События калькулятора ---------- */
