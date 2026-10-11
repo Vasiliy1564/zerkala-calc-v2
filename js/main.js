@@ -602,12 +602,8 @@
     var filmCb = $('input[name="option"][value="film"]');
     var installCb = $('input[name="option"][value="install"]');
     var installInfo = document.getElementById('installInfo');
-    var canFilm = installCb && installCb.checked;
-    if (filmOpt) filmOpt.classList.toggle('hidden', !canFilm);
-    if (filmCb && !canFilm) {
-      filmCb.checked = false;
-      state.film = false;
-    }
+    if (filmOpt) filmOpt.classList.remove('hidden');
+    if (filmCb) filmCb.disabled = false;
     if (installInfo) installInfo.classList.toggle('hidden', !(installCb && installCb.checked));
   }
 
@@ -782,9 +778,9 @@
     }
     price += sizeSurcharge(w, totalH);
 
-    /* Бронеплёнка: 120 ₽/м² по площади прямоугольника */
+    /* Бронеплёнка: 200 ₽/м² по площади прямоугольника */
     if (state.film) {
-      price += geo.area * 120;
+      price += geo.area * 200;
     }
     /* Подогрев: фиксированная доплата */
     if (state.heat) {
@@ -848,7 +844,7 @@
       inc += row('Установка', state.film ? 'на крепёж, с бронеплёнкой' : 'на крепёж');
     }
     if (state.film) {
-      inc += row('Бронеплёнка', geo.area.toFixed(2) + ' м² × 120 ₽');
+      inc += row('Бронеплёнка', 'да');
     }
     if (state.heat) {
       inc += row('Подогрев 40×60 см', 'да');
@@ -865,6 +861,7 @@
     }
     if (state.facet !== 'none') details.push(FACET_LABELS[state.facet]);
     if (state.install) details.push('с установкой');
+    if (state.film) details.push('с бронеплёнкой');
     if (state.delivery) details.push('с доставкой по городу Ставрополю за 700 ₽');
 
     var ctaText = '';
