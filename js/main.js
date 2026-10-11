@@ -213,10 +213,11 @@
   }
 
   function adj(id, delta) {
+    if (state.shape === 'semicircle' && id === 'width') return;
     var el = document.getElementById(id);
     if (!el) return;
     var v = parseInt(el.value, 10) || 0;
-    v = Math.max(40, v + delta);
+    v = Math.max(state.shape === 'semicircle' && id === 'height' ? 80 : 40, v + delta);
     if (id === 'width') v = Math.min(v, 3210);
     if (id === 'height' || id === 'height2') v = Math.min(v, 2250);
     el.value = v;
@@ -227,12 +228,20 @@
     onSizeInput();
   }
 
+  function syncSemicircleSize() {
+    if (state.shape !== 'semicircle') return;
+    var hEl = document.getElementById('height');
+    var wEl = document.getElementById('width');
+    if (hEl && wEl) wEl.value = (parseFloat(hEl.value) || 0) / 2;
+  }
+
   function onSizeInput() {
     readState();
     var hEl = document.getElementById('height');
     var wEl = document.getElementById('width');
     if (!hEl || !wEl) return;
     if (state.shape === 'circle') hEl.value = wEl.value;
+    syncSemicircleSize();
     var rowH2 = document.getElementById('rowH2');
     if (rowH2) rowH2.classList.toggle('hidden', state.shape !== 'double' && state.shape !== 'semidouble');
     updPreview();
@@ -532,12 +541,23 @@
 
     inputH.disabled = false;
     inputH.style.opacity = '1';
+    inputH.min = shape === 'semicircle' ? '80' : '40';
+    inputW.disabled = shape === 'semicircle';
+    $all('.stepper-btn[data-adj="width"]').forEach(function (button) {
+      button.disabled = shape === 'semicircle';
+    });
 
     if (shape === 'circle') {
       fieldH.classList.add('hidden');
       labelW.textContent = 'Диаметр, см';
       inputW.value = 90;
       inputH.value = 90;
+    } else if (shape === 'semicircle') {
+      fieldH.classList.remove('hidden');
+      labelH.textContent = 'Высота (диаметр круга), см';
+      labelW.textContent = 'Ширина = ½ высоты, см';
+      inputH.value = 180;
+      inputW.value = 90;
     } else if (shape === 'double') {
       fieldH.classList.remove('hidden');
       labelW.textContent = 'Ширина, см';
@@ -610,6 +630,7 @@
   }
 
   function calcGeometry() {
+    syncSemicircleSize();
     var wEl = document.getElementById('width');
     var hEl = document.getElementById('height');
     var w = parseFloat(wEl.value) || 0;
@@ -667,6 +688,7 @@
 
   function calc(scrollResult) {
     readState();
+    syncSemicircleSize();
     var wEl = document.getElementById('width');
     var hEl = document.getElementById('height');
     var w = parseFloat(wEl.value) || 0;
