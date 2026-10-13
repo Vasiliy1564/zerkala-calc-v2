@@ -1164,7 +1164,9 @@
       if (res && res.classList.contains('show')) calc(false);
     });
     quoteForm.addEventListener('click', function (event) {
-      if (event.target.matches('input[name="face-frame"], input[name="light"], input[name="clr"], input[name="facet"]')) {
+      if (event.target.name === 'clr' ||
+          (event.target.name === 'face-frame' && event.target.value !== 'none') ||
+          (event.target.name === 'facet' && ['10', '20', '25'].includes(event.target.value))) {
         scrollToMirrorPreview();
       }
     });
