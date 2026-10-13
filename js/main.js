@@ -1,3 +1,42 @@
+(function () {
+  'use strict';
+  var files = {black:'black-frame-full-height.jpg',white:'bathroom-white-frame.jpg',gold:'gold-frame-portrait.jpg'};
+  var names = {black:'чёрной',white:'белой',gold:'золотой'};
+  var box, returnTarget;
+  function move(target) {
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      target.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+    }); });
+  }
+  window.hideFrameExample = function () { if (box) box.hidden = true; };
+  window.showFrameExample = function (color, origin) {
+    if (!files[color] || document.body.classList.contains('personal-mode')) return;
+    returnTarget = origin;
+    if (!box) {
+      box = document.createElement('section');
+      box.id = 'frame-example'; box.hidden = true; box.tabIndex = -1;
+      box.style.cssText = 'max-width:760px;margin:24px auto;padding:20px;scroll-margin-top:90px;text-align:center';
+      box.innerHTML = '<h2></h2><img style="display:block;max-width:100%;width:auto;max-height:65vh;margin:16px auto;object-fit:contain" width="1086" height="1448"><p>Пример готового зеркала. Форма, размеры и подсветка зависят от выбранной комплектации.</p><button type="button" style="padding:14px 22px;border-radius:8px;background:#173d34;color:white;border:0;cursor:pointer">Вернуться к калькулятору</button>';
+      box.querySelector('button').onclick = function () {
+        box.hidden = true;
+        if (returnTarget) { move(returnTarget.closest('.field') || returnTarget.parentElement); returnTarget.focus({preventScroll:true}); }
+      };
+      var gallery = document.querySelector('.project-grid') || document.querySelector('.projects-grid');
+      var calculator = document.getElementById('calculator') || document.querySelector('main');
+      // Place the matching real photograph by the existing gallery, or above a standalone calculator.
+      var anchor = gallery ? gallery.closest('section') : calculator;
+      anchor.parentNode.insertBefore(box, anchor);
+    }
+    var photo = box.querySelector('img');
+    var galleryPhoto = document.querySelector('.project[data-category~="'+color+'-frame"] img');
+    photo.src = galleryPhoto ? galleryPhoto.src : (document.getElementById('faceFrame') ? '../assets/projects/' : 'assets/projects/') + files[color];
+    photo.alt = 'Готовое зеркало в '+names[color]+' раме';
+    photo.onload = function () { if (!box.hidden) move(box); };
+    box.querySelector('h2').textContent = 'Зеркало в '+names[color]+' раме';
+    box.hidden = false; move(box);
+  };
+})();
+
 /* ============================================================
    ЗЕРКАЛА ПРО — дизайн ARCO
    Интерактив + калькулятор (прайс: зеркало 1500 ₽/м², обработка
@@ -1164,8 +1203,12 @@
       if (res && res.classList.contains('show')) calc(false);
     });
     quoteForm.addEventListener('click', function (event) {
+      if (event.target.name === 'face-frame') {
+        if (event.target.value === 'none') window.hideFrameExample();
+        else window.showFrameExample(event.target.value, event.target);
+        return;
+      }
       if (event.target.name === 'clr' ||
-          (event.target.name === 'face-frame' && event.target.value !== 'none') ||
           (event.target.name === 'facet' && ['10', '20', '25'].includes(event.target.value))) {
         scrollToMirrorPreview();
       }
@@ -1187,5 +1230,6 @@
     updateProfileAvailability();
   }
 })();
+
 
 
