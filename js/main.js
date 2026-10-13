@@ -153,6 +153,10 @@
   function faceFramePerimeter(shape, w, h, h2) {
   var totalH = h + (shape.indexOf('double') !== -1 ? h2 : 0);
   if (shape === 'circle') return Math.PI * w / 1000;
+  if (shape === 'capsule') {
+    var shortSide = Math.min(w, h), longSide = Math.max(w, h);
+    return (Math.PI * shortSide + 2 * (longSide - shortSide)) / 1000;
+  }
   if (shape === 'oval') {
     var a = w / 2, b = h / 2, q = Math.pow(a - b, 2) / Math.pow(a + b, 2);
     return Math.PI * (a + b) * (1 + 3 * q / (10 + Math.sqrt(4 - 3 * q))) / 1000;
@@ -198,6 +202,7 @@
     rect: 'Прямоугольник',
     circle: 'Круг',
     oval: 'Овал',
+    capsule: 'Овал с прямыми боками',
     semicircle: 'Полукруг',
     double: 'Из двух частей',
     semidouble: 'Полукруг из двух частей'
@@ -225,7 +230,7 @@
 
   /* Надбавка за фигурную форму к погонному метру обработки кромки */
   function shapeMeterSurcharge(shape) {
-    return (shape === 'circle' || shape === 'oval' || shape === 'semicircle' || shape === 'semidouble') ? 95 : 0;
+    return (shape === 'circle' || shape === 'oval' || shape === 'capsule' || shape === 'semicircle' || shape === 'semidouble') ? 95 : 0;
   }
 
   /* Доплата за большую сторону: до 2000 мм включительно — 0 ₽,
@@ -457,6 +462,10 @@
         '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + r + '" ry="' + r + '" fill="url(#cornerGlow)" />' +
         '<ellipse cx="' + cx + '" cy="' + (cy + r * 0.25) + '" rx="' + (r * 0.7) + '" ry="' + (r * 0.5) + '" fill="url(#floorGrad)" opacity="0.6" />' +
         logoText(cx - r, cy - r, r * 2, r * 2);
+    } else if (shape === 'capsule') {
+      var fitCapsule = fitBox(w / h);
+      var capsuleRadius = Math.min(fitCapsule.w, fitCapsule.h) / 2;
+      content = '<rect class="mirror-body" x="' + (cx - fitCapsule.w / 2) + '" y="' + (cy - fitCapsule.h / 2) + '" width="' + fitCapsule.w + '" height="' + fitCapsule.h + '" rx="' + capsuleRadius + '" ry="' + capsuleRadius + '" fill="url(#glassGrad)" stroke="#2a3a4e" stroke-width="1" />';
     } else if (shape === 'oval') {
       var fitO = fitBox(w / h);
       var rxo = fitO.w / 2;
@@ -750,7 +759,7 @@
       area = (d * d) / 1000000;
       per = (4 * d) / 1000;
       maxD = d;
-    } else if (shape === 'oval') {
+    } else if (shape === 'oval' || shape === 'capsule') {
       /* Овал вырезается из прямоугольника: S = w×h, P = 2(w+h) */
       area = (w * h) / 1000000;
       per = (2 * (w + h)) / 1000;
