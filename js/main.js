@@ -634,11 +634,22 @@
       outline.setAttribute('stroke-width', '0.45');
       edges += outline.outerHTML;
       if (facetW) {
-        outline.setAttribute('stroke', '#f5f6ef');
-        outline.setAttribute('stroke-width', String(facetW));
-        outline.setAttribute('opacity', '0.35');
+        // Reflective bevel band over the photographic mirror preview.
+        outline.setAttribute('stroke', 'url(#realMirrorBevel)');
+        outline.setAttribute('stroke-width', String(facetW * 2));
+        outline.setAttribute('opacity', '0.88');
         outline.setAttribute('clip-path', 'url(#realMirrorClip)');
+        outline.setAttribute('class', 'mirror-facet-band');
         edges += outline.outerHTML;
+        if (body.tagName.toLowerCase() === 'rect') {
+          var bevelX = parseFloat(body.getAttribute('x')) + facetW;
+          var bevelY = parseFloat(body.getAttribute('y')) + facetW;
+          var bevelW = Math.max(0, parseFloat(body.getAttribute('width')) - 2 * facetW);
+          var bevelH = Math.max(0, parseFloat(body.getAttribute('height')) - 2 * facetW);
+          edges += '<rect class="mirror-facet-inner-edge" x="' + bevelX + '" y="' + bevelY +
+            '" width="' + bevelW + '" height="' + bevelH +
+            '" fill="none" stroke="#ffffff" stroke-width="0.75" opacity="0.9"/>';
+        }
       }
       if (hasLight) {
         // A crisp LED band remains visible over the reflection; its halo alone
@@ -665,6 +676,7 @@
     svg.insertAdjacentHTML('beforeend',
       '<defs><clipPath id="realMirrorClip">' + clipShapes + '</clipPath>' +
       '<filter id="realMirrorHalo" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4"/></filter>' +
+      '<linearGradient id="realMirrorBevel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".28" stop-color="#c2d4d6"/><stop offset=".46" stop-color="#ffffff"/><stop offset=".64" stop-color="#728b91"/><stop offset=".82" stop-color="#dbe9ec"/><stop offset="1" stop-color="#ffffff"/></linearGradient>' +
       '<linearGradient id="realMirrorSheen" x2="1" y2="1"><stop stop-color="#f5fbff" stop-opacity=".22"/><stop offset=".38" stop-color="#fff" stop-opacity=".03"/><stop offset=".52" stop-color="#fff" stop-opacity=".13"/><stop offset=".68" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#78958a" stop-opacity=".16"/></linearGradient></defs>' +
       halos + '<g clip-path="url(#realMirrorClip)">' +
       '<rect width="170" height="240" fill="#d7dbd3"/>' +
@@ -1090,7 +1102,6 @@
   $all('.stepper-btn').forEach(function (b) {
     b.addEventListener('click', function () {
       adj(b.dataset.adj, parseInt(b.dataset.delta, 10));
-      scrollToMirrorPreview();
     });
   });
   var sizeInputs = ['width', 'height', 'height2'];
@@ -1107,7 +1118,10 @@
       renderMirrorSvg();
       var res = document.getElementById('calc-result');
       if (res && res.classList.contains('show')) calc(false);
-      scrollToMirrorPreview();
+      if (event.target.matches('input[name="face-frame"], input[name="light"], input[name="clr"]') ||
+          (event.target.name === 'facet' && event.target.value !== 'grind')) {
+        scrollToMirrorPreview();
+      }
     });
     quoteForm.addEventListener('submit', function (e) {
       e.preventDefault();
