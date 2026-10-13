@@ -239,7 +239,22 @@
   }
   function fmt(n) { return Math.round(n).toLocaleString('ru-RU'); }
 
+  var deliveryBeforeInstall = false, deliveryWithInstall = false;
+  function updateDeliveryAvailability() {
+    var cb = $('input[name="option"][value="delivery"]');
+    var install = $('input[name="option"][value="install"]');
+    if (!cb || !install) return;
+    if (install.checked && !deliveryWithInstall) deliveryBeforeInstall = cb.checked;
+    if (!install.checked && deliveryWithInstall) cb.checked = deliveryBeforeInstall;
+    deliveryWithInstall = install.checked;
+    if (install.checked) cb.checked = true;
+    cb.disabled = install.checked;
+    var label = $('#deliveryOpt span');
+    if (label) label.textContent = install.checked ? 'Доставка с установкой — включена' : 'Доставка';
+  }
+
   function readState() {
+    updateDeliveryAvailability();
     var s = $('input[name="shape"]:checked');
     if (s) state.shape = s.value;
     var l = $('input[name="light"]:checked');
@@ -382,6 +397,7 @@
   }
 
   function renderMirrorSvg() {
+    readState();
     var svg = document.getElementById('mirrorSvg');
     if (!svg) return;
     var wEl = document.getElementById('width');
@@ -390,6 +406,11 @@
     var w = parseFloat(wEl.value) || 1500;
     var h = parseFloat(hEl.value) || 700;
     var shape = state.shape;
+    svg.setAttribute('aria-label', SHAPE_NAMES[shape] + (state.light ? ' с подсветкой' : ' без подсветки'));
+    svg.setAttribute('data-shape', shape);
+    $all('input[name="shape"]').forEach(function (r) {
+      r.parentElement.classList.toggle('is-selected', r.checked);
+    });
     var hasLight = state.light;
     var clr = state.clr;
     var facet = state.facet;
@@ -894,7 +915,8 @@
     price *= 1.02;
 
     /* Доставка клиенту по Ставрополю: фиксированные 700 ₽. */
-    if (state.delivery) price += 700;
+    var clientDelivery = state.install ? 400 : (state.delivery ? 700 : 0);
+    price += clientDelivery;
 
     var sizeText = '';
     if (state.shape === 'circle') {
@@ -939,7 +961,7 @@
       inc += row('Подогрев 400×600 мм', 'да');
     }
 
-    inc += row('Доставка', state.delivery ? 'по городу Ставрополю — 700 ₽' : 'не выбрана');
+    inc += row('Доставка', state.install ? 'с установкой, включена — 400 ₽' : (state.delivery ? 'по городу Ставрополю — 700 ₽' : 'не выбрана'));
     if (state.faceFrame !== 'none') inc += row('Алюминиевая рама', FACE_FRAME_LABELS[state.faceFrame]);
     if (state.aluFrame) inc += row('Каркас из алюминиевого уголка 1,5 мм', 'да');
     if (state.ledProfile) inc += row('Светодиодная лента в алюминиевом профиле', 'да');
@@ -957,7 +979,8 @@
     if (state.faceFrame !== 'none') details.push('алюминиевая рама — ' + FACE_FRAME_LABELS[state.faceFrame]);
     if (state.aluFrame) details.push('с каркасом из алюминиевого уголка 1,5 мм');
     if (state.ledProfile) details.push('со светодиодной лентой в алюминиевом профиле');
-    if (state.delivery) details.push('с доставкой по городу Ставрополю за 700 ₽');
+    if (state.install) details.push('доставка с установкой включена — 400 ₽');
+    else if (state.delivery) details.push('с доставкой по городу Ставрополю за 700 ₽');
 
     var ctaText = '';
     if (state.shape === 'double') {
@@ -1038,6 +1061,9 @@
     });
   }
 
+  window.addEventListener('pageshow', function () {
+    readState(); updateFilmAvailability(); updateProfileAvailability(); onSizeInput();
+  });
   /* ---------- Инициализация превью ---------- */
   if (document.getElementById('mirrorSvg')) {
     setTimeout(renderMirrorSvg, 100);
