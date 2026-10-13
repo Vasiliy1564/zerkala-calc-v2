@@ -166,6 +166,34 @@
   return 2 * (w + totalH + (shape === 'double' ? w : 0)) / 1000;
 }
 
+  function faceFrameStock(shape, w, h, h2) {
+  var barLength = 2700, billedLength = 3, bars;
+  if (shape === 'rect' || shape === 'double') {
+    var sides = shape === 'double' ? [w,w,h,h,w,w,h2,h2] : [w,w,h,h];
+    var pieces = [];
+    sides.forEach(function (side) {
+      while (side > barLength) { pieces.push(barLength); side -= barLength; }
+      if (side > 0) pieces.push(side);
+    });
+    pieces.sort(function (a,b) { return b-a; });
+    var best = pieces.length, bins = [];
+    function pack(i) {
+      if (i === pieces.length) { best = Math.min(best,bins.length); return; }
+      if (bins.length >= best) return;
+      var seen = {};
+      for (var j=0;j<bins.length;j++) {
+        if (seen[bins[j]] || bins[j]+pieces[i]>barLength) continue;
+        seen[bins[j]]=true; bins[j]+=pieces[i]; pack(i+1); bins[j]-=pieces[i];
+      }
+      bins.push(pieces[i]); pack(i+1); bins.pop();
+    }
+    pack(0); bars=best;
+  } else {
+    bars = Math.ceil((faceFramePerimeter(shape,w,h,h2)*1000-0.000001)/barLength);
+  }
+  return { bars:bars, metres:bars*billedLength };
+}
+
   var SHAPE_NAMES = {
     rect: 'Прямоугольник',
     circle: 'Круг',
@@ -846,7 +874,7 @@
     if (state.aluFrame) price += geo.per * 200;
     if (state.ledProfile && state.light) price += geo.per * 600;
 
-    if (state.faceFrame !== 'none') price += faceFramePerimeter(state.shape, w, h, parseFloat((document.getElementById('height2') || {}).value) || 0) * 400;
+    if (state.faceFrame !== 'none') price += faceFrameStock(state.shape, w, h, parseFloat((document.getElementById('height2') || {}).value) || 0).metres * 400;
 
     /* Налог +6% — применяется последним, ко всем расчётам */
     price *= 1.06;
