@@ -291,6 +291,35 @@
     }
   }
 
+  function updateFacetFrameCompatibility() {
+    var hasFacet = state.facet !== 'none' && state.facet !== 'grind';
+    // A restored incompatible selection keeps the bevel and removes the frame.
+    if (hasFacet && state.faceFrame !== 'none') {
+      $all('input[name="face-frame"]').forEach(function (radio) {
+        radio.checked = radio.value === 'none';
+      });
+      state.faceFrame = 'none';
+    }
+    var rectangular = state.shape === 'rect' || state.shape === 'double';
+    var hasFrame = state.faceFrame !== 'none';
+    $all('input[name="face-frame"]').forEach(function (radio) {
+      radio.disabled = !rectangular || (hasFacet && radio.value !== 'none');
+      if (radio.parentElement) {
+        radio.parentElement.style.opacity = radio.disabled ? '0.45' : '';
+        radio.parentElement.style.cursor = radio.disabled ? 'not-allowed' : '';
+      }
+    });
+    $all('input[name="facet"]').forEach(function (radio) {
+      var isFacet = radio.value !== 'none' && radio.value !== 'grind';
+      if (!isFacet) return;
+      radio.disabled = !rectangular || hasFrame;
+      if (radio.parentElement) {
+        radio.parentElement.style.opacity = radio.disabled ? '0.45' : '';
+        radio.parentElement.style.cursor = radio.disabled ? 'not-allowed' : '';
+      }
+    });
+  }
+
   function scrollToMirrorPreview() {
     var preview = document.querySelector('.calculator .calc-preview');
     if (preview) preview.scrollIntoView({
@@ -323,6 +352,7 @@
     updateFaceFrameAvailability();
     var frame = $('input[name="face-frame"]:checked');
     state.faceFrame = frame ? frame.value : 'none';
+    updateFacetFrameCompatibility();
     state.aluFrame = opt('alu-frame');
     state.ledProfile = state.light && opt('led-profile');
   }
