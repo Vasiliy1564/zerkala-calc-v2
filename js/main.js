@@ -322,9 +322,15 @@
 
   function scrollToMirrorPreview() {
     var preview = document.querySelector('.calculator .calc-preview');
-    if (preview) preview.scrollIntoView({
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-      block: 'center'
+    if (!preview) return;
+    // Wait for hidden controls and the mirror preview to finish updating.
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        preview.scrollIntoView({
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+          block: 'start'
+        });
+      });
     });
   }
 
@@ -1156,8 +1162,9 @@
       renderMirrorSvg();
       var res = document.getElementById('calc-result');
       if (res && res.classList.contains('show')) calc(false);
-      if (event.target.matches('input[name="face-frame"], input[name="light"], input[name="clr"]') ||
-          (event.target.name === 'facet' && event.target.value !== 'grind')) {
+    });
+    quoteForm.addEventListener('click', function (event) {
+      if (event.target.matches('input[name="face-frame"], input[name="light"], input[name="clr"], input[name="facet"]')) {
         scrollToMirrorPreview();
       }
     });
@@ -1178,4 +1185,5 @@
     updateProfileAvailability();
   }
 })();
+
 
