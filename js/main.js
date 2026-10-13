@@ -258,6 +258,25 @@
     if (label) label.textContent = install.checked ? 'Доставка с установкой — включена' : 'Доставка';
   }
 
+  function updateFaceFrameAvailability() {
+    var allowed = state.shape === 'rect' || state.shape === 'double';
+    var block = document.getElementById('faceFrameOpt');
+    if (block) block.classList.toggle('hidden', !allowed);
+    $all('input[name="face-frame"]').forEach(function (radio) {
+      radio.disabled = !allowed;
+      if (!allowed) radio.checked = radio.value === 'none';
+    });
+    if (!allowed) state.faceFrame = 'none';
+  }
+
+  function scrollToMirrorPreview() {
+    var preview = document.querySelector('.calculator .calc-preview');
+    if (preview) preview.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'center'
+    });
+  }
+
   function readState() {
     updateDeliveryAvailability();
     var s = $('input[name="shape"]:checked');
@@ -278,6 +297,7 @@
     state.heat = opt('heat');
     state.install = opt('install');
     state.delivery = opt('delivery');
+    updateFaceFrameAvailability();
     var frame = $('input[name="face-frame"]:checked');
     state.faceFrame = frame ? frame.value : 'none';
     state.aluFrame = opt('alu-frame');
@@ -1024,13 +1044,6 @@
   });
   $all('input[name="clr"]').forEach(function (r) {
     r.addEventListener('change', function () { readState(); renderMirrorSvg(); });
-    r.addEventListener('click', function () {
-      var preview = document.querySelector('.calculator .calc-preview');
-      if (preview) preview.scrollIntoView({
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-        block: 'center'
-      });
-    });
   });
   $all('input[name="facet"]').forEach(function (r) {
     r.addEventListener('change', onFacetChange);
@@ -1041,19 +1054,20 @@
       updateFilmAvailability();
       /* Мгновенный пересчёт итоговой цены, если результат уже показан */
       var res = document.getElementById('calc-result');
-      if (res && res.classList.contains('show')) calc();
+      if (res && res.classList.contains('show')) calc(false);
     });
   });
   $all('input[name="option"][value="film"], input[name="option"][value="heat"], input[name="option"][value="delivery"], input[name="option"][value="alu-frame"], input[name="option"][value="led-profile"]').forEach(function (r) {
     r.addEventListener('change', function () {
       readState();
       var res = document.getElementById('calc-result');
-      if (res && res.classList.contains('show')) calc();
+      if (res && res.classList.contains('show')) calc(false);
     });
   });
   $all('.stepper-btn').forEach(function (b) {
     b.addEventListener('click', function () {
       adj(b.dataset.adj, parseInt(b.dataset.delta, 10));
+      scrollToMirrorPreview();
     });
   });
   var sizeInputs = ['width', 'height', 'height2'];
@@ -1064,6 +1078,14 @@
 
   var quoteForm = $('#quote-form');
   if (quoteForm) {
+    quoteForm.addEventListener('change', function (event) {
+      if (!event.target.matches('input')) return;
+      readState();
+      renderMirrorSvg();
+      var res = document.getElementById('calc-result');
+      if (res && res.classList.contains('show')) calc(false);
+      scrollToMirrorPreview();
+    });
     quoteForm.addEventListener('submit', function (e) {
       e.preventDefault();
       calc();
