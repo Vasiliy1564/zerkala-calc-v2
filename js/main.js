@@ -986,10 +986,10 @@
 
     /* Дополнительные алюминиевые опции — по расчётному периметру,
        без минимальной покупки 6 м. Ставки скрыты в клиентском интерфейсе. */
-    if (state.aluFrame) price += geo.per * 200;
+
     if (state.ledProfile && state.light) price += geo.per * 600;
 
-    if (state.faceFrame !== 'none') price += faceFrameStock(state.shape, w, h, parseFloat((document.getElementById('height2') || {}).value) || 0).metres * 400;
+
 
     /* Налог +6% — применяется последним, ко всем расчётам */
     price *= 1.06;
@@ -1011,6 +1011,14 @@
     /* Доставка клиенту по Ставрополю: фиксированные 700 ₽. */
     var clientDelivery = state.install ? 400 : (state.delivery ? 700 : 0);
     price += clientDelivery;
+    // Final frame charges include the agreed work margin and purchasing trip.
+    if (state.faceFrame !== 'none') {
+      var frameBars = faceFrameStock(state.shape, w, h, parseFloat((document.getElementById('height2') || {}).value) || 0).bars;
+      var framePurchase = frameBars * 500;
+      price += framePurchase + Math.max(1500, framePurchase) + 400;
+    }
+    if (state.aluFrame) price += Math.max(6, geo.per) * 160 + 400;
+
 
     var sizeText = '';
     if (state.shape === 'circle') {
