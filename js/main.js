@@ -269,6 +269,28 @@
     if (!allowed) state.faceFrame = 'none';
   }
 
+  function updateFacetAvailability() {
+    var allowed = state.shape === 'rect' || state.shape === 'double';
+    var reset = false;
+    $all('input[name="facet"]').forEach(function (radio) {
+      var isFacet = radio.value !== 'none' && radio.value !== 'grind';
+      if (!isFacet) return;
+      radio.disabled = !allowed;
+      if (radio.parentElement) radio.parentElement.classList.toggle('hidden', !allowed);
+      if (!allowed && radio.checked) { radio.checked = false; reset = true; }
+    });
+    if (reset) {
+      var none = $('input[name="facet"][value="none"]');
+      if (none) none.checked = true;
+      state.facet = 'none';
+      var info = document.getElementById('edgeInfo');
+      if (info) {
+        info.textContent = 'Обработка кромки от пореза включена';
+        info.classList.remove('gold');
+      }
+    }
+  }
+
   function scrollToMirrorPreview() {
     var preview = document.querySelector('.calculator .calc-preview');
     if (preview) preview.scrollIntoView({
@@ -287,6 +309,7 @@
     if (c) state.ctrl = c.value;
     var cl = $('input[name="clr"]:checked');
     if (cl) state.clr = cl.value;
+    updateFacetAvailability();
     var f = $('input[name="facet"]:checked');
     if (f) state.facet = f.value;
     function opt(v) {
