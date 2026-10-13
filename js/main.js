@@ -143,10 +143,28 @@
     film: false,
     heat: false,
     delivery: false,
+    faceFrame: 'none',
     aluFrame: false,
     ledProfile: false,
     install: false
   };
+
+  var FACE_FRAME_LABELS = { white: 'белая', black: 'чёрная', gold: 'золотая' };
+  function faceFramePerimeter(shape, w, h, h2) {
+  var totalH = h + (shape.indexOf('double') !== -1 ? h2 : 0);
+  if (shape === 'circle') return Math.PI * w / 1000;
+  if (shape === 'oval') {
+    var a = w / 2, b = h / 2, q = Math.pow(a - b, 2) / Math.pow(a + b, 2);
+    return Math.PI * (a + b) * (1 + 3 * q / (10 + Math.sqrt(4 - 3 * q))) / 1000;
+  }
+  if (shape === 'semicircle' || shape === 'semidouble') {
+    var r = totalH / 2;
+    var perimeter = Math.PI * r + totalH;
+    if (shape === 'semidouble') perimeter += 2 * (r + Math.sqrt(Math.max(0, r * r - Math.pow(h - r, 2))));
+    return perimeter / 1000;
+  }
+  return 2 * (w + totalH + (shape === 'double' ? w : 0)) / 1000;
+}
 
   var SHAPE_NAMES = {
     rect: 'Прямоугольник',
@@ -212,6 +230,8 @@
     state.heat = opt('heat');
     state.install = opt('install');
     state.delivery = opt('delivery');
+    var frame = $('input[name="face-frame"]:checked');
+    state.faceFrame = frame ? frame.value : 'none';
     state.aluFrame = opt('alu-frame');
     state.ledProfile = state.light && opt('led-profile');
   }
@@ -530,6 +550,17 @@
         edges += outline.outerHTML;
       }
     });
+    if (state.faceFrame !== 'none') {
+      bodies.forEach(function (body) {
+        var frame = body.cloneNode(true);
+        frame.setAttribute('fill', 'none');
+        frame.setAttribute('stroke', {white:'#f7f7f4',black:'#171717',gold:'#c5a34d'}[state.faceFrame]);
+        frame.setAttribute('stroke-width', '5');
+        frame.setAttribute('clip-path', 'url(#realMirrorClip)');
+        frame.setAttribute('class', 'mirror-face-frame');
+        edges += frame.outerHTML;
+      });
+    }
     svg.insertAdjacentHTML('beforeend',
       '<defs><clipPath id="realMirrorClip">' + clipShapes + '</clipPath>' +
       '<filter id="realMirrorHalo" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4"/></filter>' +
@@ -815,6 +846,8 @@
     if (state.aluFrame) price += geo.per * 200;
     if (state.ledProfile && state.light) price += geo.per * 600;
 
+    if (state.faceFrame !== 'none') price += faceFramePerimeter(state.shape, w, h, parseFloat((document.getElementById('height2') || {}).value) || 0) * 400;
+
     /* Налог +6% — применяется последним, ко всем расчётам */
     price *= 1.06;
     // Процент к цене цельного зеркала тех же размеров и комплектации.
@@ -879,6 +912,7 @@
     }
 
     inc += row('Доставка', state.delivery ? 'по городу Ставрополю — 700 ₽' : 'не выбрана');
+    if (state.faceFrame !== 'none') inc += row('Алюминиевая рама', FACE_FRAME_LABELS[state.faceFrame]);
     if (state.aluFrame) inc += row('Каркас из алюминиевого уголка 1,5 мм', 'да');
     if (state.ledProfile) inc += row('Светодиодная лента в алюминиевом профиле', 'да');
     document.getElementById('r-inc').innerHTML = inc;
@@ -892,6 +926,7 @@
     if (state.facet !== 'none') details.push(FACET_LABELS[state.facet]);
     if (state.install) details.push('с установкой');
     if (state.film) details.push('с бронеплёнкой');
+    if (state.faceFrame !== 'none') details.push('алюминиевая рама — ' + FACE_FRAME_LABELS[state.faceFrame]);
     if (state.aluFrame) details.push('с каркасом из алюминиевого уголка 1,5 мм');
     if (state.ledProfile) details.push('со светодиодной лентой в алюминиевом профиле');
     if (state.delivery) details.push('с доставкой по городу Ставрополю за 700 ₽');
@@ -914,6 +949,13 @@
   }
 
   /* ---------- События калькулятора ---------- */
+  $all('input[name="face-frame"]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      readState(); renderMirrorSvg();
+      var res = document.getElementById('calc-result');
+      if (res && res.classList.contains('show')) calc(false);
+    });
+  });
   $all('input[name="shape"]').forEach(function (r) {
     r.addEventListener('change', function () { pickShape(r.value); });
   });
