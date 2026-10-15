@@ -621,7 +621,7 @@
               <div class="calc-included" id="r-inc"></div>
               <div class="calc-cta">
                 <a class="calc-btn calc-btn-max" id="r-cta" href="#" target="_blank" rel="noopener">Заказать в MAX</a>
-                <a class="calc-btn calc-btn-call" href="tel:+79340298528">Позвонить</a>
+                <a class="calc-btn calc-btn-call" href="#contacts" data-call-choice aria-haspopup="dialog" aria-controls="call-choice">Позвонить</a>
               </div>
             </div>
 
@@ -640,7 +640,7 @@
                 <p><b>Выезд мастера с установкой</b>Дорогу, доставку и монтаж рассчитываем индивидуально до подтверждения заказа — с учётом города, размера зеркала и сложности установки.</p>
               </div>
             </div>
-            <p class="calc-call-line">Не уверены в расчёте? <a href="tel:+79340298528">Позвоните: +7 (934) 029-85-28</a></p>
+            <p class="calc-call-line">Не уверены в расчёте? Позвоните:<br><a href="tel:+79340298528">Василий · +7 (934) 029-85-28</a><br><a href="tel:+79682693704">Михаил · +7 (968) 269-37-04</a></p>
           </form>
         </div>
       </div>
@@ -855,15 +855,55 @@
   </div>
 
   <div class="action-bar">
-    <a class="button button--bar-call" href="tel:+79340298528">Позвонить</a>
+    <a class="button button--bar-call" href="#contacts" data-call-choice aria-haspopup="dialog" aria-controls="call-choice">Позвонить</a>
     <a class="button button--bar-calc" href="#calculator">Рассчитать стоимость
       <svg viewBox="0 0 20 20" fill="none"><path d="M3 10h13M11 4l6 6-6 6" stroke="currentColor" stroke-width="1.5"/></svg>
     </a>
   </div>
 
+  <style>
+    #call-choice { box-sizing:border-box; width:calc(100% - 32px); max-width:420px; max-height:calc(100dvh - 32px); overflow:auto; margin:auto; padding:28px 20px 20px; border:1px solid #d5d7d2; border-radius:20px; background:#fff; color:#20372e; box-shadow:0 24px 80px #0003; }
+    #call-choice::backdrop { background:rgb(0 0 0 / 48%); }
+    #call-choice h2 { margin:0 36px 8px 0; font-size:26px; }
+    #call-choice p { margin:0 0 20px; color:#626b65; }
+    #call-choice .call-choice-link { display:flex; flex-direction:column; gap:4px; padding:16px; margin-top:12px; border:1px solid #cdd4ce; border-radius:12px; color:#20372e; text-decoration:none; font-size:17px; }
+    #call-choice .call-choice-link:hover { background:#f1f4ef; }
+    #call-choice .call-choice-link:focus-visible, #call-choice-close:focus-visible { outline:3px solid #857153; outline-offset:3px; }
+    #call-choice-close { position:absolute; top:12px; right:12px; width:40px; height:40px; padding:0; border:0; border-radius:50%; background:#f1f4ef; color:#20372e; cursor:pointer; font-size:28px; line-height:1; }
+  </style>
+  <dialog id="call-choice" aria-labelledby="call-choice-title" aria-describedby="call-choice-description">
+    <button id="call-choice-close" type="button" aria-label="Закрыть выбор контакта">×</button>
+    <h2 id="call-choice-title">Кому позвонить?</h2>
+    <p id="call-choice-description">Выберите удобный контакт</p>
+    <a class="call-choice-link" href="tel:+79340298528"><strong>Позвонить Василию</strong><span>+7 (934) 029-85-28</span></a>
+    <a class="call-choice-link" href="tel:+79682693704"><strong>Позвонить Михаилу</strong><span>+7 (968) 269-37-04</span></a>
+  </dialog>
+  <script>
+    (function () {
+      var dialog = document.getElementById('call-choice');
+      var trigger;
+      document.querySelectorAll('[data-call-choice]').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+          if (typeof dialog.showModal !== 'function') return;
+          event.preventDefault();
+          trigger = link;
+          dialog.showModal();
+          dialog.querySelector('.call-choice-link').focus();
+        });
+      });
+      document.getElementById('call-choice-close').addEventListener('click', function () { dialog.close(); });
+      dialog.addEventListener('click', function (event) {
+        if (event.target !== dialog) return;
+        var bounds = dialog.getBoundingClientRect();
+        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
+      });
+      dialog.addEventListener('close', function () { if (trigger) trigger.focus({preventScroll:true}); });
+    })();
+  </script>
   <script src="js/main.js?v=frame-photos-20261013" defer></script><script src="js/studio.js?v=double-4" defer></script>
 </body>
 </html>
+
 
 
 
