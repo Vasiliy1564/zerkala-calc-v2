@@ -90,7 +90,7 @@
   function $(sel, ctx) { return (ctx || document).querySelector(sel); }
   function $all(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
 
-  var MAX_URL = 'https://max.ru/u/f9LHodD0cOJCsHfbfog1RuUGjeMCEw_wI5D3w-uzWYe4wj6KqPXR9YOSHA8';
+  var MAX_URL = 'https://max.ru/u/f9LHodD0cOJfR3SWfCr0PAAJnlcPjnyOzhZYPpAWjhF-csqm7yrpZdJDnBQ';
 
   /* ---------- Fallback для битых картинок ---------- */
   document.addEventListener('error', function (e) {
