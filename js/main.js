@@ -1124,6 +1124,32 @@
     var CTRL_LABELS = { wave: 'взмах рукой', touch: 'сенсор на зеркале', remote: 'пульт ДУ', smart: 'Wi-Fi / умный дом' };
     var FACET_LABELS = { none: 'без фацета', grind: 'шлифовка', '10': 'фацет 10 мм', '20': 'фацет 20 мм', '25': 'фацет 25 мм' };
 
+    // Expose the existing unit calculation as service components. No new tariffs.
+    // Installation and procurement are already included before the existing
+    // percentage adjustments; customer delivery and frame trips are included after.
+    var serviceFactor=1.06*1.02;
+    if(state.shape==='double')serviceFactor*=1+2000/16469.75;
+    if(state.shape==='semidouble')serviceFactor*=1.2;
+    var roundingFactor=state.shape==='rounded'?1.15:1;
+    var procurementBase=state.light?costDeliveryLight:
+      (state.facet!=='none'&&state.facet!=='grind'?PRICE.facetDelivery:0);
+    var procurement=(procurementBase*serviceFactor+(state.faceFrame!=='none'?400:0)+(state.aluFrame?400:0))*roundingFactor;
+    var installBase=state.install?(state.light?costInstallLight:((area<=2)?Math.max(2000,area*1300):area*1500)):0;
+    var installCharge=installBase*serviceFactor*roundingFactor;
+    var deliveryCharge=clientDelivery*roundingFactor;
+    if(window.onPersonalCalculation)window.onPersonalCalculation({total:price,rows:[
+      {key:'mirror',sale:price-procurement-deliveryCharge-installCharge,cost:null,expense:'mirror'},
+      {key:'purchase-trip',sale:procurement,cost:null,expense:'trip'},
+      {key:'customer-delivery',sale:deliveryCharge,cost:null,expense:'delivery'},
+      {key:'installation',sale:installCharge,cost:null,expense:'install'}
+    ],mirror:{shape:state.shape,name:SHAPE_NAMES[state.shape],width:w,height:h,
+      height2:parseFloat(document.getElementById('height2').value)||0,
+      size:sizeText.split(' · ')[0],materialLabel:'Зеркало, 4 мм',
+      edge:state.facet,edgeLabel:state.facet==='none'?'обработка от порезов':FACET_LABELS[state.facet],
+      light:state.light,ctrl:state.ctrl,clr:state.clr,film:state.film,heat:state.heat,
+      ledProfile:state.ledProfile,aluFrame:state.aluFrame,faceFrame:state.faceFrame,
+      install:state.install,delivery:state.delivery,region:'stavropol',estimate:false}});
+
     document.getElementById('r-size').textContent = sizeText;
 
     document.getElementById('r-sum').textContent = fmt(price) + ' ₽';
@@ -1150,7 +1176,7 @@
       inc += row('Подогрев 400×600 мм', 'да');
     }
 
-    inc += row('Доставка', state.install ? 'с установкой, включена — 400 ₽' : (state.delivery ? 'по городу Ставрополю — 700 ₽' : 'не выбрана'));
+    inc += row('Доставка', state.install||state.delivery?'включена в итоговую стоимость':'не выбрана');
     if (state.faceFrame !== 'none') inc += row('Алюминиевая рама', FACE_FRAME_LABELS[state.faceFrame]);
     if (state.aluFrame) inc += row('Каркас из алюминиевого уголка 1,5 мм', 'да');
     if (state.ledProfile) inc += row('Светодиодная лента в алюминиевом профиле', 'да');
@@ -1182,6 +1208,7 @@
       ctaText = 'Здравствуйте! Хочу заказать ' + SHAPE_NAMES[state.shape].toLowerCase() + ' зеркало ' + (state.shape === 'circle' ? 'Ø' + w : h + '×' + w) + ' мм' + (details.length ? ' — ' + details.join(', ') : '') + '. Стоимость по калькулятору: ' + fmt(Math.round(price)) + ' ₽.';
     }
     document.getElementById('r-cta').href = MAX_URL + '?text=' + encodeURIComponent(ctaText);
+    if(window.updateSelectedMirrorTotal)window.updateSelectedMirrorTotal();
 
     var res = document.getElementById('calc-result');
     res.classList.add('show');

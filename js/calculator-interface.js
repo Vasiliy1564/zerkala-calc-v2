@@ -46,7 +46,7 @@
   var radio=form.querySelector('input[name="light"][value="'+value+'"]');
   radio.checked=true;radio.dispatchEvent(new Event('change',{bubbles:true}));syncLight();window.calculateMirrorInPlace();
   settlePosition(position);
- });b.dataset.quickLight=value;choices.appendChild(b);});quick.appendChild(choices);form.querySelector('button[type="submit"]').before(quick);
+ });b.dataset.quickLight=value;choices.appendChild(b);});quick.appendChild(choices);var quantityField=document.getElementById('quantity-field');if(quantityField)quantityField.before(quick);else form.querySelector('button[type="submit"]').before(quick);
  function syncLight(){var selected=form.querySelector('input[name="light"]:checked');choices.querySelectorAll('[data-quick-light]').forEach(function(b){b.setAttribute('aria-pressed',String(selected&&selected.value===b.dataset.quickLight));});}
  var installation=form.querySelector('input[name="option"][value="install"]');
  var installButton=quantityButton('Установить','Включить или выключить установку',function(){
