@@ -30,12 +30,13 @@
   var quickButton=e.target.closest('[data-quick-light],#quick-install');
   var label=e.target.closest('label');
   if(quickButton)beginPosition(quickButton);
-  else if(label&&label.querySelector('input[name="light"]'))beginPosition(label);
+  else if(label&&label.querySelector('input[type="radio"]:not(:disabled),input[type="checkbox"]:not(:disabled)'))beginPosition(label);
  },true);
  form.addEventListener('change',function(e){
-  if(e.target.name==='light')beginPosition(e.target.closest('label')||e.target);
+  if(e.target.matches('input[type="radio"],input[type="checkbox"],select'))beginPosition(e.target.closest('label')||e.target);
  },true);
- form.addEventListener('change',function(e){if(e.target.name==='light'&&activePosition)settlePosition(activePosition);});
+ form.addEventListener('change',function(e){if(activePosition)settlePosition(activePosition);});
+ form.addEventListener('click',function(){if(activePosition)settlePosition(activePosition);});
 
  // The same controls and pricing path as the main light selector; no copy of rates.
  var quick=document.createElement('section');quick.id='quick-light';quick.className='quick-light';

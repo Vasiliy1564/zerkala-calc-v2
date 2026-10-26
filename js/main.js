@@ -67,7 +67,7 @@
       figure.append(photo,caption); pair.appendChild(figure);
     });
     box.querySelector('h2').textContent = 'Зеркало в ' + names[color] + ' раме';
-    box.hidden = false; window.showPreviewReturn(origin); move(box);
+    box.hidden = false;
   };
 })();
 
@@ -1279,8 +1279,7 @@
       }
       if (event.target.name === 'clr' ||
           (event.target.name === 'facet' && ['10', '20', '25'].includes(event.target.value))) {
-        window.showPreviewReturn(event.target);
-        scrollToMirrorPreview();
+        // Keep option changes in place; the preview remains available above.
       }
     });
     quoteForm.addEventListener('submit', function (e) {
