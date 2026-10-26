@@ -794,7 +794,11 @@
       '<rect width="170" height="240" fill="url(#realMirrorSheen)"/></g>' + edges + splitOverlay);
   }
 
+  var enteredDimensions=null;
+  function dependentShape(shape){return ['circle','semicircle','semidouble'].indexOf(shape)!==-1;}
   function pickShape(shape) {
+    var previousShape=state.shape;
+    if(!dependentShape(previousShape))enteredDimensions={width:document.getElementById('width').value,height:document.getElementById('height').value};
     state.shape = shape;
     var fieldH = document.getElementById('fieldH');
     var labelW = document.getElementById('labelW');
@@ -813,36 +817,35 @@
     if (shape === 'circle') {
       fieldH.classList.add('hidden');
       labelW.textContent = 'Диаметр, мм';
-      inputW.value = 900;
-      inputH.value = 900;
+
+
     } else if (shape === 'semicircle') {
       fieldH.classList.remove('hidden');
       labelH.textContent = 'Высота (диаметр круга), мм';
       labelW.textContent = 'Ширина = ½ высоты, мм';
-      inputH.value = 1800;
-      inputW.value = 900;
+
+
     } else if (shape === 'double') {
       fieldH.classList.remove('hidden');
       labelW.textContent = 'Ширина, мм';
       labelH.textContent = 'Высота верхней, мм';
-      inputW.value = 800;
-      inputH.value = 1600;
-      document.getElementById('height2').value = 600;
+
     } else if (shape === 'semidouble') {
       fieldH.classList.remove('hidden');
       labelW.textContent = 'Ширина = ½ общей высоты, мм';
       labelH.textContent = 'Высота верхней части, мм';
-      inputW.value = 800;
-      inputH.value = 1000;
-      document.getElementById('height2').value = 800;
+
     } else {
       fieldH.classList.remove('hidden');
       labelW.textContent = 'Ширина, мм';
       labelH.textContent = 'Высота, мм';
-      inputW.value = 800;
-      inputH.value = 1800;
+
+
     }
 
+    if(!dependentShape(shape)&&dependentShape(previousShape)&&enteredDimensions){
+      inputW.value=enteredDimensions.width;inputH.value=enteredDimensions.height;
+    }
     onSizeInput();
     updPreview();
   }
@@ -1258,6 +1261,8 @@
       calc();
     });
   }
+
+  window.calculateMirrorInPlace=function(){calc(false);};
 
   window.addEventListener('pageshow', function () {
     readState(); updateFilmAvailability(); updateProfileAvailability(); onSizeInput();
