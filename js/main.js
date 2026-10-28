@@ -1070,7 +1070,7 @@
     /* Дополнительные алюминиевые опции — по расчётному периметру,
        без минимальной покупки 6 м. Ставки скрыты в клиентском интерфейсе. */
 
-    if (state.ledProfile && state.light) price += geo.per * 600;
+    if (state.ledProfile && state.light) price += geo.per * 250;
 
 
 
@@ -1142,7 +1142,7 @@
       {key:'purchase-trip',sale:procurement,cost:null,expense:'trip'},
       {key:'customer-delivery',sale:deliveryCharge,cost:null,expense:'delivery'},
       {key:'installation',sale:installCharge,cost:null,expense:'install'}
-    ],mirror:{shape:state.shape,name:SHAPE_NAMES[state.shape],width:w,height:h,
+    ],mirror:{ledProfileTariffVersion:1,shape:state.shape,name:SHAPE_NAMES[state.shape],width:w,height:h,
       height2:parseFloat(document.getElementById('height2').value)||0,
       size:sizeText.split(' · ')[0],materialLabel:'Зеркало, 4 мм',
       edge:state.facet,edgeLabel:state.facet==='none'?'обработка от порезов':FACET_LABELS[state.facet],
