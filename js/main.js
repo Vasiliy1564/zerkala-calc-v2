@@ -1179,7 +1179,7 @@
     inc += row('Доставка', state.install||state.delivery?'включена в итоговую стоимость':'не выбрана');
     if (state.faceFrame !== 'none') inc += row('Алюминиевая рама', FACE_FRAME_LABELS[state.faceFrame]);
     if (state.aluFrame) inc += row('Каркас из алюминиевого уголка 1,5 мм', 'да');
-    if (state.ledProfile) inc += row('Светодиодная лента в алюминиевом профиле', 'да');
+    if (state.ledProfile) inc += row('Светодиодная лента в профиле', 'да');
     document.getElementById('r-inc').innerHTML = inc;
 
     var details = [];
