@@ -441,14 +441,14 @@
     if ((state.shape === 'semicircle' || state.shape === 'semidouble') && id === 'width') return;
     var el = document.getElementById(id);
     if (!el) return;
-    var v = parseInt(el.value, 10) || 0;
+    var v = window.MirrorSize.read(el) || 0;
     v = Math.max(state.shape === 'semicircle' && id === 'height' ? 800 : 400, v + delta);
     if (id === 'width') v = Math.min(v, 32100);
     if (id === 'height' || id === 'height2') v = Math.min(v, 22500);
-    el.value = v;
+    window.MirrorSize.write(el, v);
     if (state.shape === 'circle') {
       var hEl = document.getElementById('height');
-      if (hEl) hEl.value = v;
+      if (hEl) window.MirrorSize.write(hEl, v);
     }
     onSizeInput();
   }
@@ -459,9 +459,9 @@
     var wEl = document.getElementById('width');
     var h2El = document.getElementById('height2');
     if (hEl && wEl) {
-      var totalHeight = parseFloat(hEl.value) || 0;
-      if (state.shape === 'semidouble') totalHeight += h2El ? (parseFloat(h2El.value) || 0) : 0;
-      wEl.value = totalHeight / 2;
+      var totalHeight = window.MirrorSize.read(hEl) || 0;
+      if (state.shape === 'semidouble') totalHeight += h2El ? (window.MirrorSize.read(h2El) || 0) : 0;
+      window.MirrorSize.write(wEl, totalHeight / 2);
     }
   }
 
@@ -477,9 +477,9 @@
     updPreview();
     // Обновляем уже показанную цену при вводе размеров и нажатии +/−.
     var res = document.getElementById('calc-result');
-    var validSize = parseFloat(wEl.value) >= 400 && parseFloat(hEl.value) >= 400;
+    var validSize = window.MirrorSize.read(wEl) >= 400 && window.MirrorSize.read(hEl) >= 400;
     if (state.shape === 'double' || state.shape === 'semidouble') {
-      validSize = validSize && parseFloat(document.getElementById('height2').value) >= 400;
+      validSize = validSize && window.MirrorSize.read(document.getElementById('height2')) >= 400;
     }
     if (res && res.classList.contains('show') && validSize) calc(false);
   }
@@ -502,27 +502,27 @@
     var wEl = document.getElementById('width');
     var hEl = document.getElementById('height');
     if (!wEl || !hEl) return;
-    var w = parseFloat(wEl.value) || 1500;
-    var h = parseFloat(hEl.value) || 700;
+    var w = window.MirrorSize.read(wEl) || 1500;
+    var h = window.MirrorSize.read(hEl) || 700;
 
     var lblW = document.getElementById('lblW');
     var lblH = document.getElementById('lblH');
 
     if (state.shape === 'circle') {
-      if (lblW) lblW.textContent = 'Ø ' + w + ' мм';
-      if (lblH) lblH.textContent = '';
+      if (lblW) lblW.textContent = window.MirrorSize.dimensions('Ø ' + w + ' мм');
+      if (lblH) lblH.textContent = window.MirrorSize.dimensions('');
     } else if (state.shape === 'double') {
-      var h2 = parseFloat(document.getElementById('height2').value) || 600;
-      if (lblW) lblW.textContent = w + ' мм';
-      if (lblH) lblH.textContent = h + ' + ' + h2 + ' мм';
+      var h2 = window.MirrorSize.read(document.getElementById('height2')) || 600;
+      if (lblW) lblW.textContent = window.MirrorSize.dimensions(w + ' мм');
+      if (lblH) lblH.textContent = window.MirrorSize.dimensions(h + ' + ' + h2 + ' мм');
     } else if (state.shape === 'semidouble') {
-      var h2Semi = parseFloat(document.getElementById('height2').value) || 800;
+      var h2Semi = window.MirrorSize.read(document.getElementById('height2')) || 800;
       var totalSemiH = h + h2Semi;
-      if (lblW) lblW.textContent = w + ' мм';
-      if (lblH) lblH.textContent = h + ' + ' + h2Semi + ' = ' + totalSemiH + ' мм';
+      if (lblW) lblW.textContent = window.MirrorSize.dimensions(w + ' мм');
+      if (lblH) lblH.textContent = window.MirrorSize.dimensions(h + ' + ' + h2Semi + ' = ' + totalSemiH + ' мм');
     } else {
-      if (lblW) lblW.textContent = w + ' мм';
-      if (lblH) lblH.textContent = h + ' мм';
+      if (lblW) lblW.textContent = window.MirrorSize.dimensions(w + ' мм');
+      if (lblH) lblH.textContent = window.MirrorSize.dimensions(h + ' мм');
     }
 
     var wrap = document.getElementById('mirrorWrap');
@@ -533,7 +533,7 @@
     if (state.shape === 'circle') {
       aspect = 1;
     } else if (state.shape === 'semidouble') {
-      var h2Aspect = parseFloat(document.getElementById('height2').value) || 800;
+      var h2Aspect = window.MirrorSize.read(document.getElementById('height2')) || 800;
       aspect = w / (h + h2Aspect);
     } else {
       aspect = w / h;
@@ -561,8 +561,8 @@
     var wEl = document.getElementById('width');
     var hEl = document.getElementById('height');
     if (!wEl || !hEl) return;
-    var w = parseFloat(wEl.value) || 1500;
-    var h = parseFloat(hEl.value) || 700;
+    var w = window.MirrorSize.read(wEl) || 1500;
+    var h = window.MirrorSize.read(hEl) || 700;
     var shape = state.shape;
     svg.setAttribute('aria-label', SHAPE_NAMES[shape] + (state.light ? ' с подсветкой' : ' без подсветки'));
     svg.setAttribute('data-shape', shape);
@@ -661,7 +661,7 @@
     } else if (shape === 'semidouble') {
       /* Один цельный полукруг, разделённый горизонтальным монтажным стыком.
          Подсветка проходит только по внешнему контуру всей композиции. */
-      var h2SD = parseFloat(document.getElementById('height2').value) || 800;
+      var h2SD = window.MirrorSize.read(document.getElementById('height2')) || 800;
       var totalHSD = h + h2SD;
       var fitSD = fitBox(w / totalHSD);
       var bwSD = fitSD.w;
@@ -682,7 +682,7 @@
       splitOverlay = '<line class="mirror-split-gap" x1="' + splitLeftXSD + '" y1="' + splitYSD + '" x2="' + rightSD + '" y2="' + splitYSD + '" stroke="#eeeae2" stroke-width="3.2" />' +
         '<line class="mirror-split-edge" x1="' + splitLeftXSD + '" y1="' + splitYSD + '" x2="' + rightSD + '" y2="' + splitYSD + '" stroke="#68736d" stroke-width="0.75" opacity="0.9" />';
     } else if (shape === 'double') {
-      var h2v = parseFloat(document.getElementById('height2').value) || 600;
+      var h2v = window.MirrorSize.read(document.getElementById('height2')) || 600;
       var totalH = parseFloat(h) + parseFloat(h2v);
       var aspectD = parseFloat(w) / totalH;
       var bw, bh;
@@ -808,7 +808,7 @@
 
     inputH.disabled = false;
     inputH.style.opacity = '1';
-    inputH.min = shape === 'semicircle' ? '800' : '400';
+    inputH.min = shape === 'semicircle' ? '80' : '40';
     inputW.disabled = shape === 'semicircle' || shape === 'semidouble';
     $all('.stepper-btn[data-adj="width"]').forEach(function (button) {
       button.disabled = shape === 'semicircle' || shape === 'semidouble';
@@ -816,29 +816,29 @@
 
     if (shape === 'circle') {
       fieldH.classList.add('hidden');
-      labelW.textContent = 'Диаметр, мм';
+      labelW.textContent = 'Диаметр, см';
 
 
     } else if (shape === 'semicircle') {
       fieldH.classList.remove('hidden');
-      labelH.textContent = 'Высота (диаметр круга), мм';
-      labelW.textContent = 'Ширина = ½ высоты, мм';
+      labelH.textContent = 'Высота (диаметр круга), см';
+      labelW.textContent = 'Ширина = ½ высоты, см';
 
 
     } else if (shape === 'double') {
       fieldH.classList.remove('hidden');
-      labelW.textContent = 'Ширина, мм';
-      labelH.textContent = 'Высота верхней, мм';
+      labelW.textContent = 'Ширина, см';
+      labelH.textContent = 'Высота верхней, см';
 
     } else if (shape === 'semidouble') {
       fieldH.classList.remove('hidden');
-      labelW.textContent = 'Ширина = ½ общей высоты, мм';
-      labelH.textContent = 'Высота верхней части, мм';
+      labelW.textContent = 'Ширина = ½ общей высоты, см';
+      labelH.textContent = 'Высота верхней части, см';
 
     } else {
       fieldH.classList.remove('hidden');
-      labelW.textContent = 'Ширина, мм';
-      labelH.textContent = 'Высота, мм';
+      labelW.textContent = 'Ширина, см';
+      labelH.textContent = 'Высота, см';
 
 
     }
@@ -909,8 +909,8 @@
     syncSemicircleSize();
     var wEl = document.getElementById('width');
     var hEl = document.getElementById('height');
-    var w = parseFloat(wEl.value) || 0;
-    var h = parseFloat(hEl.value) || 0;
+    var w = window.MirrorSize.read(wEl) || 0;
+    var h = window.MirrorSize.read(hEl) || 0;
     var shape = state.shape;
 
     var area, per, maxD;
@@ -938,7 +938,7 @@
       per = (2 * (w + h)) / 1000;
       maxD = Math.max(w, h);
     } else if (shape === 'double') {
-      var h2v = parseFloat(document.getElementById('height2').value) || 0;
+      var h2v = window.MirrorSize.read(document.getElementById('height2')) || 0;
       area = (w * h + w * h2v) / 1000000;
       per = (2 * (w + h) + 2 * (w + h2v)) / 1000;
       maxD = Math.max(w, h, h2v);
@@ -946,7 +946,7 @@
       /* Базовая стоимость совпадает с обычным полукругом тех же общих
          габаритов. Надбавка 20% за изготовление из двух частей применяется
          к окончательной цене ниже. */
-      var h2SemiCalc = parseFloat(document.getElementById('height2').value) || 800;
+      var h2SemiCalc = window.MirrorSize.read(document.getElementById('height2')) || 800;
       var totalSemiCalc = h + h2SemiCalc;
       area = (w * totalSemiCalc) / 1000000;
       per = (2 * (w + totalSemiCalc)) / 1000;
@@ -967,12 +967,12 @@
     syncSemicircleSize();
     var wEl = document.getElementById('width');
     var hEl = document.getElementById('height');
-    var w = parseFloat(wEl.value) || 0;
-    var h = parseFloat(hEl.value) || 0;
+    var w = window.MirrorSize.read(wEl) || 0;
+    var h = window.MirrorSize.read(hEl) || 0;
 
-    if (w < 400 || (state.shape !== 'circle' && h < 400)) { alert('Минимальный размер — 400 мм'); return; }
-    if ((state.shape === 'double' || state.shape === 'semidouble') && (parseFloat(document.getElementById('height2').value) || 0) < 400) {
-      alert('Минимальная высота каждой части — 400 мм');
+    if (w < 400 || (state.shape !== 'circle' && h < 400)) { alert('Минимальный размер — 40 см'); return; }
+    if ((state.shape === 'double' || state.shape === 'semidouble') && (window.MirrorSize.read(document.getElementById('height2')) || 0) < 400) {
+      alert('Минимальная высота каждой части — 40 см');
       return;
     }
 
@@ -983,7 +983,7 @@
     var ledPer = geo.ledPer;
     // База для двух частей — цельный прямоугольник тех же общих размеров.
     if (state.shape === 'double') {
-      var combinedHeight = h + (parseFloat(document.getElementById('height2').value) || 0);
+      var combinedHeight = h + (window.MirrorSize.read(document.getElementById('height2')) || 0);
       area = w * combinedHeight / 1000000;
       per = 2 * (w + combinedHeight) / 1000;
       edgePer = per;
@@ -1054,7 +1054,7 @@
     /* Сравниваем ширину с высотой; у составных форм — с общей высотой. */
     var totalH = h;
     if (state.shape === 'double' || state.shape === 'semidouble') {
-      totalH += parseFloat(document.getElementById('height2').value) || 0;
+      totalH += window.MirrorSize.read(document.getElementById('height2')) || 0;
     }
     price += sizeSurcharge(w, totalH);
 
@@ -1096,7 +1096,7 @@
     price += clientDelivery;
     // Final frame charges include the agreed work margin and purchasing trip.
     if (state.faceFrame !== 'none') {
-      var frameBars = faceFrameStock(state.shape, w, h, parseFloat((document.getElementById('height2') || {}).value) || 0).bars;
+      var frameBars = faceFrameStock(state.shape, w, h, window.MirrorSize.read(document.getElementById('height2')) || 0).bars;
       var framePurchase = frameBars * 500;
       price += framePurchase + Math.max(1500, framePurchase) + 400;
     }
@@ -1111,7 +1111,7 @@
     if (state.shape === 'circle') {
       sizeText = 'Ø ' + w + ' мм · ' + SHAPE_NAMES[state.shape];
     } else if (state.shape === 'double' || state.shape === 'semidouble') {
-      var h2r = parseFloat(document.getElementById('height2').value) || 0;
+      var h2r = window.MirrorSize.read(document.getElementById('height2')) || 0;
       sizeText = h + '+' + h2r + ' × ' + w + ' мм · ' + SHAPE_NAMES[state.shape];
     } else {
       sizeText = h + ' × ' + w + ' мм · ' + SHAPE_NAMES[state.shape];
@@ -1143,14 +1143,14 @@
       {key:'customer-delivery',sale:deliveryCharge,cost:null,expense:'delivery'},
       {key:'installation',sale:installCharge,cost:null,expense:'install'}
     ],mirror:{ledProfileTariffVersion:1,shape:state.shape,name:SHAPE_NAMES[state.shape],width:w,height:h,
-      height2:parseFloat(document.getElementById('height2').value)||0,
-      size:sizeText.split(' · ')[0],materialLabel:'Зеркало, 4 мм',
+      height2:window.MirrorSize.read(document.getElementById('height2'))||0,
+      size:window.MirrorSize.dimensions(sizeText.split(' · ')[0]),materialLabel:'Зеркало, 4 мм',
       edge:state.facet,edgeLabel:state.facet==='none'?'обработка от порезов':FACET_LABELS[state.facet],
       light:state.light,ctrl:state.ctrl,clr:state.clr,film:state.film,heat:state.heat,
       ledProfile:state.ledProfile,aluFrame:state.aluFrame,faceFrame:state.faceFrame,
       install:state.install,delivery:state.delivery,region:'stavropol',estimate:false}});
 
-    document.getElementById('r-size').textContent = sizeText;
+    document.getElementById('r-size').textContent = window.MirrorSize.dimensions(sizeText);
 
     document.getElementById('r-sum').textContent = fmt(price) + ' ₽';
 
@@ -1199,13 +1199,13 @@
 
     var ctaText = '';
     if (state.shape === 'double') {
-      var h2c = parseFloat(document.getElementById('height2').value) || 0;
-      ctaText = 'Здравствуйте! Хочу заказать зеркало из двух частей ' + h + '+' + h2c + '×' + w + ' мм' + (details.length ? ' — ' + details.join(', ') : '') + '. Стоимость по калькулятору: ' + fmt(Math.round(price)) + ' ₽.';
+      var h2c = window.MirrorSize.read(document.getElementById('height2')) || 0;
+      ctaText = 'Здравствуйте! Хочу заказать зеркало из двух частей ' + window.MirrorSize.cm(h) + '+' + window.MirrorSize.cm(h2c) + '×' + window.MirrorSize.cm(w) + ' см' + (details.length ? ' — ' + details.join(', ') : '') + '. Стоимость по калькулятору: ' + fmt(Math.round(price)) + ' ₽.';
     } else if (state.shape === 'semidouble') {
-      var h2SemiCta = parseFloat(document.getElementById('height2').value) || 0;
-      ctaText = 'Здравствуйте! Хочу заказать полукруг из двух частей ' + h + '+' + h2SemiCta + '×' + w + ' мм' + (details.length ? ' — ' + details.join(', ') : '') + '. Стоимость по калькулятору: ' + fmt(Math.round(price)) + ' ₽.';
+      var h2SemiCta = window.MirrorSize.read(document.getElementById('height2')) || 0;
+      ctaText = 'Здравствуйте! Хочу заказать полукруг из двух частей ' + window.MirrorSize.cm(h) + '+' + window.MirrorSize.cm(h2SemiCta) + '×' + window.MirrorSize.cm(w) + ' см' + (details.length ? ' — ' + details.join(', ') : '') + '. Стоимость по калькулятору: ' + fmt(Math.round(price)) + ' ₽.';
     } else {
-      ctaText = 'Здравствуйте! Хочу заказать ' + SHAPE_NAMES[state.shape].toLowerCase() + ' зеркало ' + (state.shape === 'circle' ? 'Ø' + w : h + '×' + w) + ' мм' + (details.length ? ' — ' + details.join(', ') : '') + '. Стоимость по калькулятору: ' + fmt(Math.round(price)) + ' ₽.';
+      ctaText = 'Здравствуйте! Хочу заказать ' + SHAPE_NAMES[state.shape].toLowerCase() + ' зеркало ' + (state.shape === 'circle' ? 'Ø' + window.MirrorSize.cm(w) : window.MirrorSize.cm(h) + '×' + window.MirrorSize.cm(w)) + ' см' + (details.length ? ' — ' + details.join(', ') : '') + '. Стоимость по калькулятору: ' + fmt(Math.round(price)) + ' ₽.';
     }
     document.getElementById('r-cta').href = MAX_URL + '?text=' + encodeURIComponent(ctaText);
     if(window.updateSelectedMirrorTotal)window.updateSelectedMirrorTotal();
