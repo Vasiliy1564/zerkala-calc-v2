@@ -130,7 +130,7 @@ html{scroll-padding-top:16px}#quote-form{scroll-margin-top:0}body{background:#ff
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 <link rel="stylesheet" href="css/calculator-interface.css?v=item-totals-20261028"><style>html.size-input-editing,html.size-input-editing body{scroll-behavior:auto!important;overflow-anchor:none!important}html.size-input-editing .action-bar,html.size-input-editing #return-to-calculator,html.size-input-editing #example-return{display:none!important}#width,#height,#height2{scroll-margin-top:24px;scroll-margin-bottom:12px}</style><link rel="stylesheet" href="css/color-palette.css?v=colors-only-20261102"><link rel="stylesheet" href="css/studio-order.css?v=all-forms-scroll-20261102">
-</head>
+<link rel="stylesheet" href="css/delivery-route.css?v=stav-services-20261103"><link rel="stylesheet" href="css/carry.css?v=stav-services-20261103"></head>
 <body>
   <a class="skip-link" href="#main">К содержимому</a>
 
@@ -670,7 +670,7 @@ html{scroll-padding-top:16px}#quote-form{scroll-margin-top:0}body{background:#ff
               <label>Дополнительно</label>
               <div class="options options--checks">
                 <label id="installOpt"><input type="checkbox" name="option" value="install"><span>Установка</span></label>
-                <div class="install-info hidden" id="installInfo"><strong>Варианты установки:</strong><br>С подсветкой — только на крепёж.<br>Без подсветки — на крепёж или приклеить.<br>Бронеплёнку можно заказать отдельно, без установки.<br>При выборе установки доставка по Ставрополю включена в итог.<br><strong>Важно:</strong> стоимость установки в калькуляторе действует в Ставрополе. Выезд в другой город края рассчитывается отдельно.</div>
+                <div class="install-info hidden" id="installInfo"><strong>Варианты установки:</strong><br>С подсветкой — только на крепёж.<br>Без подсветки — на крепёж или приклеить.<br>Бронеплёнку можно заказать отдельно, без установки.<br>Доставка и подъём выбираются отдельно.<br><strong>Важно:</strong> стоимость установки в калькуляторе действует в Ставрополе. Выезд в другой город края рассчитывается отдельно.</div>
                 <label id="deliveryOpt"><input type="checkbox" name="option" value="delivery"><span>Доставка</span></label>
                 <label id="filmOpt"><input type="checkbox" name="option" value="film"><span>Бронеплёнка</span></label>
                 <label id="aluFrameOpt"><input type="checkbox" name="option" value="alu-frame"><span>Каркас из алюминиевого уголка 1,5 мм</span></label>
@@ -710,12 +710,12 @@ html{scroll-padding-top:16px}#quote-form{scroll-margin-top:0}body{background:#ff
               <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2c-3 0-5 2-5 5 0 2.3 1.5 4.3 3.5 5l-.7 4.5L10 15.5l2.2 1-1-4.5C13.5 11.3 15 9.3 15 7c0-3-2-5-5-5zm-2 5a2 2 0 1 1 4 0 2 2 0 0 1-4 0z" fill="currentColor"/></svg>
               Наше объявление на Авито
             </a>
-            <p class="form-disclaimer">Итоговая цена рассчитана по указанным размерам и выбранным опциям. При выборе установки доставка по Ставрополю включается автоматически. Без установки доставку можно выбрать отдельно. Доставка за пределы Ставрополя и выезд мастера по краю в эту сумму не входят.</p>
-            <div class="region-delivery-note" aria-label="Условия доставки по Ставропольскому краю">
-              <div class="region-delivery-title"><span>Другой город края?</span><strong>Доставка считается отдельно</strong></div>
+            <p class="form-disclaimer">Стоимость зеркала, установки, доставки и подъёма показана отдельно. Для доставки введите адрес и выберите найденный дом. Без расчёта адреса доставка не включена в итог.</p>
+            <div class="region-delivery-note" aria-label="Условия доставки">
+              <div class="region-delivery-title"><span>Доставка по адресу</span><strong>Рассчитайте в калькуляторе</strong></div>
               <div class="region-delivery-options">
-                <p><b>Транспортная служба</b>Передаём упакованное зеркало водителю. Стоимость определяет выбранный сервис — например, «Яндекс Доставка» или «Максим». Клиент оплачивает её отдельно.</p>
-                <p><b>Выезд мастера с установкой</b>Дорогу, доставку и монтаж рассчитываем индивидуально до подтверждения заказа — с учётом города, размера зеркала и сложности установки.</p>
+                <p><b>До клиента</b>Введите город, улицу и дом. Стоимость доставки добавится один раз на весь заказ после выбора адреса.</p>
+                <p><b>Подъём и установка</b>Для подъёма укажите этаж и способ: лифт, в который помещается зеркало, или пешком. Выезд мастера за пределы Ставрополя согласуем отдельно.</p>
               </div>
             </div>
             <p class="calc-call-line">Не уверены в расчёте? Позвоните:<br><a href="tel:+79682693704">Михаил · +7 (968) 269-37-04</a><br><a href="tel:+79064706604">Ахмед · +7 (906) 470-66-04</a></p>
@@ -829,7 +829,7 @@ html{scroll-padding-top:16px}#quote-form{scroll-margin-top:0}body{background:#ff
         <div>
           <div class="faq-list">
             <details class="faq-item"><summary>Сколько изготавливается зеркало?</summary><p>От 2 дней до недели в зависимости от сложности. Зеркала без подсветки — быстрее, с LED-подсветкой и нестандартной формой — до недели. Точный срок фиксируем в смете до начала производства.</p></details>
-            <details class="faq-item"><summary>Как доставляете по Ставропольскому краю?</summary><p>Есть два варианта. Первый — передаём зеркало в защитной упаковке транспортной службе, например «Яндекс Доставке» или «Максим». Тариф определяет сервис, доставку клиент оплачивает отдельно. Второй — мастер лично привозит и устанавливает зеркало. Такой выезд рассчитываем заранее и отдельно с учётом города, расстояния, размера зеркала и сложности монтажа.</p></details>
+            <details class="faq-item"><summary>Как доставляете по Ставропольскому краю?</summary><p>Стоимость доставки до адреса можно предварительно рассчитать в калькуляторе: выберите доставку, введите город, улицу и дом и подтвердите найденный адрес. Подъём на этаж выбирается отдельно. Условия перевозки и выезд мастера за пределы Ставрополя согласуем перед заказом.</p></details>
             <details class="faq-item"><summary>Выполняете ли монтаж?</summary><p>Да, устанавливаем под ключ: на крепёжах или с приклеиванием (приклеить можно только зеркало без подсветки). Для зеркал с подсветкой — крепёж с вентиляционным зазором под блок питания и LED-ленту.</p></details>
             <details class="faq-item"><summary>Как управлять подсветкой?</summary><p>На выбор: взмах рукой, сенсор на зеркале, пульт ДУ или Wi-Fi (умный дом). Диммер встроен во все типы управления — яркость регулируется плавно.</p></details>
             <details class="faq-item"><summary>Как подключить подсветку?</summary><p>Два способа: напрямую к выводу 220В из стены или через розетку — в комплекте кабель до 5 метров с евровилкой. Блок питания 12V уже встроен в каркас зеркала.</p></details>
@@ -979,8 +979,9 @@ html{scroll-padding-top:16px}#quote-form{scroll-margin-top:0}body{background:#ff
       dialog.addEventListener('close', function () { if (trigger) trigger.focus({preventScroll:true}); });
     })();
   </script>
-  <script src="js/size-units.js?v=one-mm-20261029" defer></script><script src="js/main.js?v=square-corners-20261102" defer></script><script src="js/studio.js?v=all-forms-scroll-20261102" defer></script>
+  <script src="js/size-units.js?v=stav-services-20261103" defer></script><script src="js/order-pricing.js?v=stav-services-20261103" defer></script><script src="js/delivery-route.js?v=stav-services-20261103" defer></script><script src="js/carry.js?v=stav-services-20261103" defer></script><script src="js/main.js?v=stav-services-20261103" defer></script><script src="js/studio.js?v=all-forms-scroll-20261102" defer></script>
 
 
-<script src="js/order-pricing.js?v=profile-250-20261028" defer></script><script src="js/quote-details.js?v=cm-one-mm-20261029" defer></script><script src="js/order.js?v=cm-one-mm-20261029" defer></script><script src="js/calculator-interface.js?v=copy-stable-20261026" defer></script><script src="js/copy-calculation.js?v=item-totals-20261028" defer></script><script src="js/keyboard.js?v=keyboard-resize-20261029" defer></script></body>
+<script src="js/quote-details.js?v=stav-services-20261103" defer></script><script src="js/order.js?v=stav-services-20261103" defer></script><script src="js/calculator-interface.js?v=copy-stable-20261026" defer></script><script src="js/copy-calculation.js?v=item-totals-20261028" defer></script><script src="js/keyboard.js?v=keyboard-resize-20261029" defer></script></body>
 </html>
+

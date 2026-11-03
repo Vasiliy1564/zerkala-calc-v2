@@ -318,18 +318,12 @@
   }
   function fmt(n) { return Math.round(n).toLocaleString('ru-RU'); }
 
-  var deliveryBeforeInstall = false, deliveryWithInstall = false;
   function updateDeliveryAvailability() {
     var cb = $('input[name="option"][value="delivery"]');
-    var install = $('input[name="option"][value="install"]');
-    if (!cb || !install) return;
-    if (install.checked && !deliveryWithInstall) deliveryBeforeInstall = cb.checked;
-    if (!install.checked && deliveryWithInstall) cb.checked = deliveryBeforeInstall;
-    deliveryWithInstall = install.checked;
-    if (install.checked) cb.checked = true;
-    cb.disabled = install.checked;
+    if (cb) cb.disabled = false;
     var label = $('#deliveryOpt span');
-    if (label) label.textContent = install.checked ? 'Доставка с установкой — включена' : 'Доставка';
+    if(label)label.textContent='Доставка по адресу';
+    if(window.MirrorDelivery)window.MirrorDelivery.updateVisibility();
   }
 
   function updateFaceFrameAvailability() {
@@ -1091,9 +1085,9 @@
     /* Дополнительные 2% ко всем итоговым расчётам, до округления. */
     price *= 1.02;
 
-    /* Доставка клиенту по Ставрополю: фиксированные 700 ₽. */
-    var clientDelivery = state.install ? 400 : (state.delivery ? 700 : 0);
-    price += clientDelivery;
+    /* Доставка по маршруту: базовая стоимость и километры сверх первых пяти. */
+    var deliveryRoute=window.MirrorDelivery?window.MirrorDelivery.getRoute():null;
+    var clientDelivery=window.MirrorOrderPricing.deliveryPrice(Math.max(w,totalH),deliveryRoute?deliveryRoute.km:null,state.delivery,state.install);
     // Final frame charges include the agreed work margin and purchasing trip.
     if (state.faceFrame !== 'none') {
       var frameBars = faceFrameStock(state.shape, w, h, window.MirrorSize.read(document.getElementById('height2')) || 0).bars;
@@ -1106,6 +1100,7 @@
     // Rounded corners: the rectangular calculation plus 15%, before rounding.
     var roundedSurcharge = state.shape === 'rounded' ? price * 0.15 : 0;
     price += roundedSurcharge;
+    price += clientDelivery;
 
     var sizeText = '';
     if (state.shape === 'circle') {
@@ -1136,13 +1131,13 @@
     var procurement=(procurementBase*serviceFactor+(state.faceFrame!=='none'?400:0)+(state.aluFrame?400:0))*roundingFactor;
     var installBase=state.install?(state.light?costInstallLight:((area<=2)?Math.max(2000,area*1300):area*1500)):0;
     var installCharge=installBase*serviceFactor*roundingFactor;
-    var deliveryCharge=clientDelivery*roundingFactor;
+    var deliveryCharge=clientDelivery;
     if(window.onPersonalCalculation)window.onPersonalCalculation({total:price,rows:[
       {key:'mirror',sale:price-procurement-deliveryCharge-installCharge,cost:null,expense:'mirror'},
       {key:'purchase-trip',sale:procurement,cost:null,expense:'trip'},
       {key:'customer-delivery',sale:deliveryCharge,cost:null,expense:'delivery'},
       {key:'installation',sale:installCharge,cost:null,expense:'install'}
-    ],mirror:{ledProfileTariffVersion:1,shape:state.shape,name:SHAPE_NAMES[state.shape],width:w,height:h,
+    ],mirror:{carry:window.MirrorCarry?window.MirrorCarry.read():null,ledProfileTariffVersion:1,shape:state.shape,name:SHAPE_NAMES[state.shape],width:w,height:h,
       height2:window.MirrorSize.read(document.getElementById('height2'))||0,
       size:window.MirrorSize.dimensions(sizeText.split(' · ')[0]),materialLabel:'Зеркало, 4 мм',
       edge:state.facet,edgeLabel:state.facet==='none'?'обработка от порезов':FACET_LABELS[state.facet],
@@ -1176,7 +1171,7 @@
       inc += row('Подогрев 400×600 мм', 'да');
     }
 
-    inc += row('Доставка', state.install||state.delivery?'включена в итоговую стоимость':'не выбрана');
+    inc += row('Доставка', state.delivery?(deliveryRoute?'по указанному адресу':'укажите адрес — не включена'):'не выбрана');
     if (state.faceFrame !== 'none') inc += row('Алюминиевая рама', FACE_FRAME_LABELS[state.faceFrame]);
     if (state.aluFrame) inc += row('Каркас из алюминиевого уголка 1,5 мм', 'да');
     if (state.ledProfile) inc += row('Светодиодная лента в профиле', 'да');
@@ -1194,8 +1189,7 @@
     if (state.faceFrame !== 'none') details.push('алюминиевая рама — ' + FACE_FRAME_LABELS[state.faceFrame]);
     if (state.aluFrame) details.push('с каркасом из алюминиевого уголка 1,5 мм');
     if (state.ledProfile) details.push('со светодиодной лентой в алюминиевом профиле');
-    if (state.install) details.push('доставка с установкой включена — 400 ₽');
-    else if (state.delivery) details.push('с доставкой по городу Ставрополю за 700 ₽');
+    if (state.delivery) details.push('доставка по адресу клиента');
 
     var ctaText = '';
     if (state.shape === 'double') {
@@ -1301,3 +1295,4 @@
     updateProfileAvailability();
   }
 })();
+
