@@ -21,6 +21,12 @@
   var top=hold.service?hold.y:window.scrollY+hold.anchor.getBoundingClientRect().top-hold.top;
   if(Math.abs(window.scrollY-top)>0.5)window.scrollTo({top:top,left:hold.x,behavior:'instant'});
  }
+ function revealService(panel){
+  if(!panel||panel.hidden)return;
+  var viewport=window.visualViewport,top=(viewport?viewport.offsetTop:0)+96;
+  var delta=Math.max(0,panel.getBoundingClientRect().top-top);
+  if(delta>2)window.scrollTo({top:window.scrollY+delta,left:window.scrollX,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+ }
  function settlePosition(hold){
   restorePosition(hold);
   requestAnimationFrame(function(){restorePosition(hold);requestAnimationFrame(function(){
@@ -29,7 +35,7 @@
   if(hold.service){
    // Mobile focus/scroll anchoring can run after the checkbox change event.
    [80,180].forEach(function(delay){setTimeout(function(){restorePosition(hold);},delay);});
-   setTimeout(function(){restorePosition(hold);if(activePosition===hold)releasePosition();},280);
+   setTimeout(function(){if(activePosition!==hold)return;restorePosition(hold);releasePosition();revealService(hold.reveal);},280);
   }
  }
  form.addEventListener('pointerdown',function(e){
@@ -50,7 +56,11 @@
  form.addEventListener('change',function(e){
   if(e.target.matches('input[type="radio"],input[type="checkbox"],select'))beginPosition(e.target.closest('label')||e.target);
  },true);
- form.addEventListener('change',function(e){if(activePosition)settlePosition(activePosition);});
+ form.addEventListener('change',function(e){
+  if(!activePosition)return;
+  if(e.target.checked&&e.target.matches('#carry-enabled,input[name="option"][value="delivery"]'))activePosition.reveal=document.getElementById(e.target.id==='carry-enabled'?'carry-fields':'delivery-address-panel');
+  settlePosition(activePosition);
+ });
  form.addEventListener('click',function(){if(activePosition)settlePosition(activePosition);});
 
  // The same controls and pricing path as the main light selector; no copy of rates.
