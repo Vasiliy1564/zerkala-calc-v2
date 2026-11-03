@@ -10,28 +10,43 @@
 
 
  var activePosition=null;
+ function releasePosition(){activePosition=null;document.documentElement.classList.remove('calc-position-hold');}
  function beginPosition(anchor){
-  if(activePosition)return activePosition;
-  var hold={anchor:anchor,top:anchor.getBoundingClientRect().top};
+  if(activePosition&&activePosition.anchor===anchor)return activePosition;
+  var hold={anchor:anchor,top:anchor.getBoundingClientRect().top,x:window.scrollX,y:window.scrollY,service:anchor.matches('#carry-option,#deliveryOpt')};
   document.documentElement.classList.add('calc-position-hold');activePosition=hold;return hold;
  }
  function restorePosition(hold){
   if(activePosition!==hold||!hold.anchor.isConnected)return;
-  var delta=hold.anchor.getBoundingClientRect().top-hold.top;
-  if(Math.abs(delta)>0.5)window.scrollTo({top:window.scrollY+delta,left:window.scrollX,behavior:'instant'});
+  var top=hold.service?hold.y:window.scrollY+hold.anchor.getBoundingClientRect().top-hold.top;
+  if(Math.abs(window.scrollY-top)>0.5)window.scrollTo({top:top,left:hold.x,behavior:'instant'});
  }
  function settlePosition(hold){
   restorePosition(hold);
   requestAnimationFrame(function(){restorePosition(hold);requestAnimationFrame(function(){
-   restorePosition(hold);if(activePosition===hold){activePosition=null;document.documentElement.classList.remove('calc-position-hold');}
+   restorePosition(hold);if(!hold.service&&activePosition===hold)releasePosition();
   });});
+  if(hold.service){
+   // Mobile focus/scroll anchoring can run after the checkbox change event.
+   [80,180].forEach(function(delay){setTimeout(function(){restorePosition(hold);},delay);});
+   setTimeout(function(){restorePosition(hold);if(activePosition===hold)releasePosition();},280);
+  }
  }
  form.addEventListener('pointerdown',function(e){
+  releasePosition();
   var quickButton=e.target.closest('[data-quick-light],#quick-install');
   var label=e.target.closest('label');
   if(quickButton)beginPosition(quickButton);
   else if(label&&label.querySelector('input[type="radio"]:not(:disabled),input[type="checkbox"]:not(:disabled)'))beginPosition(label);
  },true);
+ form.addEventListener('keydown',function(e){
+  if(e.key===' '&&e.target.matches('#carry-enabled,input[name="option"][value="delivery"]'))beginPosition(e.target.closest('label'));
+  else if(e.key==='Tab'||e.key==='PageDown'||e.key==='PageUp'||e.key.indexOf('Arrow')===0)releasePosition();
+ },true);
+ // Respect deliberate scrolling and new interactions while a correction is pending.
+ window.addEventListener('wheel',releasePosition,{passive:true});
+ window.addEventListener('touchmove',releasePosition,{passive:true});
+ document.addEventListener('pointerdown',function(e){if(!form.contains(e.target))releasePosition();},true);
  form.addEventListener('change',function(e){
   if(e.target.matches('input[type="radio"],input[type="checkbox"],select'))beginPosition(e.target.closest('label')||e.target);
  },true);
@@ -69,3 +84,4 @@
  document.addEventListener('focusin',updateGuides);document.addEventListener('focusout',function(){setTimeout(updateGuides,0);});
  if(window.ResizeObserver)new ResizeObserver(updateGuides).observe(document.body);updateGuides();
 })();
+

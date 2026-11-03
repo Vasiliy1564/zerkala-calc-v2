@@ -5,7 +5,8 @@ var origin='ГК Рубеж, Ставрополь, улица 45-я Паралл
 var form=document.getElementById('quote-form'),option=document.querySelector('input[name="option"][value="delivery"]');
 var panel=document.createElement('div');panel.id='delivery-address-panel';panel.className='delivery-address-panel';
 panel.innerHTML='<label for="delivery-address">Адрес доставки</label><input id="delivery-address" type="text" autocomplete="street-address" placeholder="Город, улица, дом"><button type="button" class="button" id="delivery-search">Рассчитать доставку</button><div id="delivery-candidates"></div><p id="delivery-route-status" role="status" aria-live="polite"></p><small class="delivery-attribution">© OpenStreetMap</small>';
-document.getElementById('deliveryOpt').after(panel);
+// Keep expanding details outside the option grid so its buttons never reflow.
+var group=document.getElementById('deliveryOpt').closest('.options'),details=document.createElement('div');details.id='mirror-service-details';group.after(details);details.appendChild(panel);
 var input=document.getElementById('delivery-address'),status=document.getElementById('delivery-route-status'),results=document.getElementById('delivery-candidates'),button=document.getElementById('delivery-search');
 function priceText(mm){return route?window.MirrorOrderPricing.deliveryPrice(mm,route.km,true,form.querySelector('input[name=option][value=install]').checked).toLocaleString('ru-RU')+' ₽':'';}
 function updatePrice(){if(!route)return;var v=window.MirrorSize,shape=form.querySelector('input[name=shape]:checked'),w=v?v.read(document.getElementById('width')):0,h=v?v.read(document.getElementById('height')):0;if(shape&&shape.value==='circle')h=w;if(shape&&/double/.test(shape.value))h+=v.read(document.getElementById('height2'));status.textContent='Доставка: '+priceText(Math.max(w,h));}
