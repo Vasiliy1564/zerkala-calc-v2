@@ -13,7 +13,7 @@
  function releasePosition(){activePosition=null;document.documentElement.classList.remove('calc-position-hold');}
  function beginPosition(anchor){
   if(activePosition&&activePosition.anchor===anchor)return activePosition;
-  var hold={anchor:anchor,top:anchor.getBoundingClientRect().top,x:window.scrollX,y:window.scrollY,service:anchor.matches('#carry-option,#deliveryOpt')};
+  var hold={anchor:anchor,top:anchor.getBoundingClientRect().top,x:window.scrollX,y:window.scrollY,service:anchor.matches('#carry-option,#deliveryOpt,#installOpt,#quick-install')};
   document.documentElement.classList.add('calc-position-hold');activePosition=hold;return hold;
  }
  function restorePosition(hold){
@@ -46,7 +46,7 @@
   else if(label&&label.querySelector('input[type="radio"]:not(:disabled),input[type="checkbox"]:not(:disabled)'))beginPosition(label);
  },true);
  form.addEventListener('keydown',function(e){
-  if(e.key===' '&&e.target.matches('#carry-enabled,input[name="option"][value="delivery"]'))beginPosition(e.target.closest('label'));
+  if(e.key===' '&&e.target.matches('#carry-enabled,input[name="option"][value="delivery"],input[name="option"][value="install"]'))beginPosition(e.target.closest('label'));
   else if(e.key==='Tab'||e.key==='PageDown'||e.key==='PageUp'||e.key.indexOf('Arrow')===0)releasePosition();
  },true);
  // Respect deliberate scrolling and new interactions while a correction is pending.
@@ -58,7 +58,7 @@
  },true);
  form.addEventListener('change',function(e){
   if(!activePosition)return;
-  if(e.target.checked&&e.target.matches('#carry-enabled,input[name="option"][value="delivery"]'))activePosition.reveal=document.getElementById(e.target.id==='carry-enabled'?'carry-fields':'delivery-address-panel');
+  if(e.target.checked&&e.target.matches('#carry-enabled,input[name="option"][value="delivery"],input[name="option"][value="install"]'))activePosition.reveal=document.getElementById(e.target.id==='carry-enabled'?'carry-fields':'delivery-address-panel');
   settlePosition(activePosition);
  });
  form.addEventListener('click',function(){if(activePosition)settlePosition(activePosition);});

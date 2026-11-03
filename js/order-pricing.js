@@ -5,7 +5,8 @@ function bounded(value,min,max,fallback){var n=Number(value);return Number.isFin
 function maxSide(m){var w=Number(m.width)||0,h=m.shape==='circle'?w:Number(m.height)||0;if(m.shape==='double'||m.shape==='semidouble')h+=Number(m.height2)||0;return Math.max(w,h);}
 function deliveryRate(mm){return mm<=1800?20:mm<=2000?25:30;}
 function route(){return root.MirrorDelivery?root.MirrorDelivery.getRoute():null;}
-function deliveryPrice(mm,km,requested,installed){return requested&&Number.isFinite(km)&&km>=0?Math.round((installed?400:700)+Math.max(0,km-5)*deliveryRate(mm)):0;}
+function deliveryBase(requested,installed){return requested?(installed?400:700):0;}
+function deliveryPrice(mm,km,requested,installed){var base=deliveryBase(requested,installed);return !requested?0:!Number.isFinite(km)||km<0?base:Math.round(base+Math.max(0,km-5)*deliveryRate(mm));}
 
 function carryPrice(mm,options){
  var o=options||{};if(!o.enabled)return {requested:false,amount:0,pending:false};
@@ -31,7 +32,7 @@ function refreshProfileCalculation(data){
 function refreshServices(data){
  data=refreshProfileCalculation(data);
  if(!data||!data.mirror||!Array.isArray(data.rows))return data;
- var m=data.mirror,r=route(),delivery=deliveryPrice(maxSide(m),r?r.km:null,m.delivery,m.install),carry=carryPrice(maxSide(m),m.carry),total=data.total,hasDelivery=false,hasCarry=false;
+ var m=data.mirror,r=route(),delivery=deliveryPrice(maxSide(m),r?r.km:null,m.delivery||m.install,m.install),carry=carryPrice(maxSide(m),m.carry),total=data.total,hasDelivery=false,hasCarry=false;
  var rows=data.rows.map(function(row){
   var sale=row.sale;
   if(row.key==='customer-delivery'){sale=delivery;hasDelivery=true;}
@@ -51,7 +52,7 @@ function calculate(items,settings){
   count+=qty;goods+=data.total*qty;
   var mirror=data.mirror,carrying=carryPrice(maxSide(mirror),mirror.carry);
   carryRequested=carryRequested||carrying.requested;carryPending=carryPending||carrying.pending;
-  longest=Math.max(longest,maxSide(mirror));requested=requested||!!mirror.delivery;
+  longest=Math.max(longest,maxSide(mirror));requested=requested||!!(mirror.delivery||mirror.install);
   if(mirror.install)installedCount+=qty;
   if(mirror.install||mirror.delivery)regions[mirror.region]=true;
   data.rows.forEach(function(row){
@@ -82,8 +83,20 @@ function calculate(items,settings){
   if(expenses[key]!==''&&expenses[key]!==null&&expenses[key]!==undefined){known+=bounded(expenses[key],0,100000000,0);delete missing[key];}
  });
  known+=bounded(settings.other||0,0,100000000,0);
- return {carry:carry,carryRequested:carryRequested,carryPending:carryPending,installedCount:installedCount,deliveryRequested:requested,deliveryPending:requested&&!r,deliveryKm:r?r.km:null,deliveryAddress:r?r.address:'',count:count,total:total,goods:goods,trip:trip,delivery:delivery,installation:install,discount:discount,discountRate:discountRate,installationAfterDiscount:install-discount,known:known,tax:tax,profit:total-known-tax,missing:Object.keys(missing),mixedRegions:mixedRegions,externalDelivery:requested&&!r};
+ return {deliveryBase:deliveryBase(requested,count>0&&installedCount===count),deliveryExtra:Math.max(0,delivery-deliveryBase(requested,count>0&&installedCount===count)),carry:carry,carryRequested:carryRequested,carryPending:carryPending,installedCount:installedCount,deliveryRequested:requested,deliveryPending:requested&&!r,deliveryKm:r?r.km:null,deliveryAddress:r?r.address:'',count:count,total:total,goods:goods,trip:trip,delivery:delivery,installation:install,discount:discount,discountRate:discountRate,installationAfterDiscount:install-discount,known:known,tax:tax,profit:total-known-tax,missing:Object.keys(missing),mixedRegions:mixedRegions,externalDelivery:requested&&!r};
 }
-var api={calculate:calculate,refreshServices:refreshServices,maxSide:maxSide,deliveryPrice:deliveryPrice,deliveryRate:deliveryRate,carryPrice:carryPrice};if(typeof module==='object'&&module.exports)module.exports=api;else root.MirrorOrderPricing=api;
+function selection(data,quantity){
+ var qty=Math.floor(bounded(quantity,1,999,1));data=refreshServices(data);
+ if(!data||!data.mirror)return data;
+ var totals=calculate([{qty:qty,data:data}],{});
+ var rows=data.rows.map(function(row){
+  var once=row.key==='purchase-trip'||row.key==='customer-delivery';
+  var sale=row.key==='customer-delivery'?totals.delivery:row.sale*(once?1:qty);
+  return Object.assign({},row,{sale:sale,cost:row.cost===null?null:row.cost*(once?1:qty)});
+ });
+ if(totals.discount)rows.push({key:'installation-discount',name:'Скидка 20% на установку',sale:-totals.discount,cost:0,note:'При заказе от двух зеркал'});
+ return {rows:rows,total:rows.reduce(function(sum,row){return sum+row.sale;},0),mirror:data.mirror,quantity:qty};
+}
+var api={selection:selection,deliveryBase:deliveryBase,calculate:calculate,refreshServices:refreshServices,maxSide:maxSide,deliveryPrice:deliveryPrice,deliveryRate:deliveryRate,carryPrice:carryPrice};if(typeof module==='object'&&module.exports)module.exports=api;else root.MirrorOrderPricing=api;
 })(typeof window==='object'?window:globalThis);
 

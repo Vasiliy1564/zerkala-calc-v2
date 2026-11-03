@@ -319,10 +319,10 @@
   function fmt(n) { return Math.round(n).toLocaleString('ru-RU'); }
 
   function updateDeliveryAvailability() {
-    var cb = $('input[name="option"][value="delivery"]');
-    if (cb) cb.disabled = false;
-    var label = $('#deliveryOpt span');
-    if(label)label.textContent='Доставка по адресу';
+    var cb=$('input[name="option"][value="delivery"]'),install=$('input[name="option"][value="install"]');
+    if(cb){if(install&&install.checked)cb.checked=true;cb.disabled=!!(install&&install.checked);}
+    var label=$('#deliveryOpt span');if(label)label.textContent='Доставка по адресу';
+    var field=document.getElementById('deliveryRegionField');if(field)field.hidden=true;
     if(window.MirrorDelivery)window.MirrorDelivery.updateVisibility();
   }
 
@@ -1171,7 +1171,7 @@
       inc += row('Подогрев 400×600 мм', 'да');
     }
 
-    inc += row('Доставка', state.delivery?(deliveryRoute?'по указанному адресу':'укажите адрес — не включена'):'не выбрана');
+    inc += row('Доставка', window.MirrorDelivery?window.MirrorDelivery.describe():'не выбрана');
     if (state.faceFrame !== 'none') inc += row('Алюминиевая рама', FACE_FRAME_LABELS[state.faceFrame]);
     if (state.aluFrame) inc += row('Каркас из алюминиевого уголка 1,5 мм', 'да');
     if (state.ledProfile) inc += row('Светодиодная лента в профиле', 'да');
