@@ -4,7 +4,7 @@
 var origin='ГК Рубеж, Ставрополь, улица 45-я Параллель, 44',point=[41.9110926,45.0011119],route=null,revision=0,busy=false,lastSearch=0;
 var form=document.getElementById('quote-form'),option=document.querySelector('input[name="option"][value="delivery"]');
 var panel=document.createElement('div');panel.id='delivery-address-panel';panel.className='delivery-address-panel';
-panel.innerHTML='<label for="delivery-address">Укажите адрес доставки</label><input id="delivery-address" type="text" autocomplete="street-address" placeholder="Город, улица, дом"><button type="button" class="button" id="delivery-search">Рассчитать доставку</button><div id="delivery-candidates"></div><p id="delivery-route-status" role="status" aria-live="polite"></p><small class="delivery-attribution">© OpenStreetMap</small>';
+panel.innerHTML='<label for="delivery-address">Укажите адрес доставки</label><input id="delivery-address" type="text" autocomplete="street-address" placeholder="Город, улица, дом"><button type="button" class="button" id="delivery-search">Рассчитать доставку</button><div id="delivery-candidates"></div><p id="delivery-route-status" role="status" aria-live="polite"></p><small class="delivery-attribution">© 2ГИС · © OpenStreetMap</small>';
 // Keep expanding details outside the option grid so its buttons never reflow.
 var group=document.getElementById('deliveryOpt').closest('.options'),details=document.createElement('div');details.id='mirror-service-details';group.after(details);details.appendChild(panel);
 var input=document.getElementById('delivery-address'),status=document.getElementById('delivery-route-status'),results=document.getElementById('delivery-candidates'),button=document.getElementById('delivery-search');
@@ -26,8 +26,8 @@ visibility();option.addEventListener('change',visibility);
 function reset(){revision++;route=null;busy=false;button.disabled=false;results.replaceChildren();status.textContent='';emit();}
 input.addEventListener('input',reset);
 input.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();button.click();}});
-async function json(url){var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},18000);try{var response=await fetch(url,{signal:controller.signal});if(!response.ok)throw Error('HTTP '+response.status);return await response.json();}finally{clearTimeout(timer);}}
-function address(f){var p=f.properties;return [p.city||p.town||p.locality,p.street,p.housenumber].filter(Boolean).join(', ');}
+async function json(url,options){var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},22000);try{var response=await fetch(url,Object.assign({},options,{signal:controller.signal}));if(!response.ok)throw Error('HTTP '+response.status);return await response.json();}finally{clearTimeout(timer);}}
+function address(f){var p=f.properties;if(p.label)return p.label;return [p.city||p.town||p.locality,p.street,p.housenumber].filter(Boolean).join(', ');}
 async function choose(f,token){
  var destination=f.geometry.coordinates;results.replaceChildren();status.textContent='Считаем доставку…';
  try{
@@ -47,14 +47,13 @@ button.addEventListener('click',async function(){
  if(busy)return;var query=input.value.trim();if(query.length<5){status.textContent='Укажите город, улицу и номер дома.';return;}
  if(Date.now()-lastSearch<1100)return;lastSearch=Date.now();busy=true;button.disabled=true;var token=++revision;route=null;results.replaceChildren();status.textContent='Ищем адрес…';emit();
  try{
-  if(!/ставрополь|михайловск|шпаковск|невинномысск|изобильн|надежда|татарка|пелагиад/i.test(query))query='Ставрополь, '+query;
-  var data=await json('https://photon.komoot.io/api/?q='+encodeURIComponent(query)+'&limit=6&lat='+point[1]+'&lon='+point[0]+'&bbox=40,43,44,47');
+  var data=await json('https://zerkalo-address-api.vercel.app/api/geocode',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:query,market:'stav'})});
   if(token!==revision)return;
-  var seen={};var matches=(data.features||[]).filter(function(f){var p=f.properties||{},c=f.geometry&&f.geometry.coordinates,key=address(f);if(!c||!p.housenumber||!p.street||c[0]<40||c[0]>44||c[1]<43||c[1]>47||seen[key])return false;seen[key]=true;return true;});
+  var seen={};var matches=(data.features||[]).filter(function(f){var c=f.geometry&&f.geometry.coordinates,key=address(f);if(!c||!Number.isFinite(c[0])||!Number.isFinite(c[1])||!key||seen[key])return false;seen[key]=true;return true;});
   if(!matches.length){status.textContent='Дом не найден. Уточните город, улицу и номер дома. Укажите адрес для уточнения стоимости.';return;}
   status.textContent='Выберите адрес:';
   matches.forEach(function(f){var item=document.createElement('button');item.type='button';item.className='delivery-candidate';item.textContent=address(f);item.onclick=function(){if(token!==revision)return;busy=true;button.disabled=true;choose(f,token);};results.appendChild(item);});
- }catch(e){if(token===revision)status.textContent='Поиск адреса недоступен. Повторите позже. Укажите адрес для уточнения стоимости.';}
+ }catch(e){if(token===revision)status.textContent='Поиск 2ГИС сейчас недоступен. Повторите позже.';}
  finally{if(token===revision){busy=false;button.disabled=false;}}
 });
 })();
