@@ -271,6 +271,40 @@
   return { bars:bars, metres:bars*billedLength };
 }
 
+  /* Уголок продаётся цельными трёхметровыми хлыстами. */
+  var ANGLE_FRAME = { barLength: 3000, pricePerMetre: 80, purchaseTrip: 500 };
+  function angleFrameBars(shape, w, h, h2, perimeter) {
+    if (shape !== 'rect' && shape !== 'rounded' && shape !== 'double') {
+      // Для фигурных зеркал сохраняем прежний расчётный периметр.
+      return Math.ceil(perimeter * 1000 / ANGLE_FRAME.barLength);
+    }
+    var sides = shape === 'double' ? [w,w,w,w,h,h,h2,h2] : [w,w,h,h];
+    var pieces = [];
+    sides.forEach(function (side) {
+      var remaining = Math.max(0, Math.round(side));
+      while (remaining > 0) {
+        var piece = Math.min(ANGLE_FRAME.barLength, remaining);
+        pieces.push(piece);
+        remaining -= piece;
+      }
+    });
+    pieces.sort(function (a,b) { return b-a; });
+    var bins = [], best = pieces.length;
+    function pack(i) {
+      if (i === pieces.length) { best = Math.min(best, bins.length); return; }
+      if (bins.length >= best) return;
+      var seen = {};
+      for (var j = 0; j < bins.length; j++) {
+        if (seen[bins[j]] || bins[j] + pieces[i] > ANGLE_FRAME.barLength) continue;
+        seen[bins[j]] = true;
+        bins[j] += pieces[i]; pack(i+1); bins[j] -= pieces[i];
+      }
+      bins.push(pieces[i]); pack(i+1); bins.pop();
+    }
+    pack(0);
+    return best;
+  }
+
   var SHAPE_NAMES = {
     rect: 'Прямоугольник',
     rounded: 'Прямоугольник с закруглёнными углами',
@@ -402,6 +436,37 @@
     });
   }
 
+  /* При высоте свыше 200 см каркас обязателен. Для составных зеркал
+     учитывается общая высота, для круга — диаметр. */
+  function updateRequiredAngleFrame() {
+    var cb = $('input[name="option"][value="alu-frame"]');
+    if (!cb) return;
+    var h = state.shape === 'circle'
+      ? (window.MirrorSize.read(document.getElementById('width')) || 0)
+      : (window.MirrorSize.read(document.getElementById('height')) || 0);
+    if (state.shape === 'double' || state.shape === 'semidouble')
+      h += window.MirrorSize.read(document.getElementById('height2')) || 0;
+    var required = h > 2000;
+    if (required) {
+      if (cb.dataset.autoRequired !== '1')
+        cb.dataset.manualChecked = cb.checked ? '1' : '0';
+      cb.checked = true;
+      cb.disabled = true;
+      cb.dataset.autoRequired = '1';
+    } else {
+      if (cb.dataset.autoRequired === '1') {
+        cb.checked = cb.dataset.manualChecked === '1';
+        delete cb.dataset.autoRequired;
+        delete cb.dataset.manualChecked;
+      }
+      cb.disabled = false;
+    }
+    var label = document.querySelector('#aluFrameOpt span');
+    if (label) label.textContent = required
+      ? 'Каркас из алюминиевого уголка 1,5 мм (обязательно свыше 200 см, включён в цену)'
+      : 'Каркас из алюминиевого уголка 1,5 мм';
+  }
+
   function readState() {
     updateDeliveryAvailability();
     var s = $('input[name="shape"]:checked');
@@ -427,6 +492,7 @@
     var frame = $('input[name="face-frame"]:checked');
     state.faceFrame = frame ? frame.value : 'none';
     updateFacetFrameCompatibility();
+    updateRequiredAngleFrame();
     state.aluFrame = opt('alu-frame');
     state.ledProfile = state.light && opt('led-profile');
   }
@@ -1061,8 +1127,7 @@
       price += 2500;
     }
 
-    /* Дополнительные алюминиевые опции — по расчётному периметру,
-       без минимальной покупки 6 м. Ставки скрыты в клиентском интерфейсе. */
+    /* Алюминиевые опции; уголок оплачивается целыми хлыстами по 3 м. */
 
     if (state.ledProfile && state.light) price += geo.per * 250;
 
@@ -1094,7 +1159,12 @@
       var framePurchase = frameBars * 500;
       price += framePurchase + Math.max(1500, framePurchase) + 400;
     }
-    if (state.aluFrame) price += Math.max(6, geo.per) * 160 + 400;
+    if (state.aluFrame) {
+      var angleBars = angleFrameBars(state.shape, w, h,
+        window.MirrorSize.read(document.getElementById('height2')) || 0, geo.per);
+      price += angleBars * (ANGLE_FRAME.barLength / 1000) * ANGLE_FRAME.pricePerMetre
+        + ANGLE_FRAME.purchaseTrip;
+    }
 
 
     // Rounded corners: the rectangular calculation plus 15%, before rounding.
@@ -1128,7 +1198,7 @@
     var roundingFactor=state.shape==='rounded'?1.15:1;
     var procurementBase=state.light?costDeliveryLight:
       (state.facet!=='none'&&state.facet!=='grind'?PRICE.facetDelivery:0);
-    var procurement=(procurementBase*serviceFactor+(state.faceFrame!=='none'?400:0)+(state.aluFrame?400:0))*roundingFactor;
+    var procurement=(procurementBase*serviceFactor+(state.faceFrame!=='none'?400:0)+(state.aluFrame?ANGLE_FRAME.purchaseTrip:0))*roundingFactor;
     var installBase=state.install?(state.light?costInstallLight:((area<=2)?Math.max(2000,area*1300):area*1500)):0;
     var installCharge=installBase*serviceFactor*roundingFactor;
     var deliveryCharge=clientDelivery;
