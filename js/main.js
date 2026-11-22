@@ -437,17 +437,18 @@
     });
   }
 
-  /* Для зеркал с LED-подсветкой каркас обязателен от 200 см включительно. Для составных зеркал
-     учитывается общая высота, для круга — диаметр. */
+  /* Каркас обязателен от 200 см высоты или при ширине свыше 100 см.
+     Для составных зеркал учитывается общая высота, для круга — диаметр. */
   function updateRequiredAngleFrame() {
     var cb = $('input[name="option"][value="alu-frame"]');
     if (!cb) return;
+    var w = window.MirrorSize.read(document.getElementById('width')) || 0;
     var h = state.shape === 'circle'
-      ? (window.MirrorSize.read(document.getElementById('width')) || 0)
+      ? w
       : (window.MirrorSize.read(document.getElementById('height')) || 0);
     if (state.shape === 'double' || state.shape === 'semidouble')
       h += window.MirrorSize.read(document.getElementById('height2')) || 0;
-    var required = state.light && h >= 2000;
+    var required = h >= 2000 || w > 1000;
     if (required) {
       if (cb.dataset.autoRequired !== '1')
         cb.dataset.manualChecked = cb.checked ? '1' : '0';
@@ -464,7 +465,7 @@
     }
     var label = document.querySelector('#aluFrameOpt span');
     if (label) label.textContent = required
-      ? 'Каркас из алюминиевого уголка 1,5 мм (с подсветкой от 200 см, включён в цену)'
+      ? 'Каркас из алюминиевого уголка 1,5 мм (обязателен: высота от 200 см или ширина более 100 см, включён в цену)'
       : 'Каркас из алюминиевого уголка 1,5 мм';
   }
 
